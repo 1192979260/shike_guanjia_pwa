@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../core/service_locator.dart';
+import '../models/models.dart';
 import '../services/auth_service.dart';
 import '../services/http/http_backend_service.dart';
 import '../services/storage_service.dart';
@@ -30,25 +31,34 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String phone, String code) async {
+  Future<bool> register(String phone, String password) {
+    return _authenticate(() => _authService.register(phone, password));
+  }
+
+  Future<bool> login(String phone, String password) {
+    return _authenticate(() => _authService.login(phone, password));
+  }
+
+  Future<bool> _authenticate(Future<User?> Function() action) async {
     _isLoading = true;
     notifyListeners();
 
-    final user = await _authService.login(phone, code);
-    if (user != null) {
-      _isLoggedIn = true;
-      _phone = user.phone;
-      final backend = _authService is HttpBackendService ? _authService : null;
-      _familyId = (await backend?.getCurrentFamily())?.id ?? _storage.familyId;
+    try {
+      final user = await action();
+      if (user != null) {
+        _isLoggedIn = true;
+        _phone = user.phone;
+        final backend = _authService is HttpBackendService
+            ? _authService
+            : null;
+        _familyId =
+            (await backend?.getCurrentFamily())?.id ?? _storage.familyId;
+      }
+      return user != null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
-    return user != null;
-  }
-
-  Future<void> sendVerificationCode(String phone) {
-    return _authService.sendVerificationCode(phone).then((_) {});
   }
 
   Future<void> logout() async {

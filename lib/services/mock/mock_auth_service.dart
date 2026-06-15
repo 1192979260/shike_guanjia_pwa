@@ -9,53 +9,41 @@ class MockAuthService implements AuthService {
 
   final MockDataStore _store;
   final _uuid = const Uuid();
-  final _codes = <String, _VerificationCode>{};
-  final _requestTimes = <String, List<DateTime>>{};
+  final _passwords = <String, String>{};
 
   @override
-  Future<bool> sendVerificationCode(String phone) async {
-    if (!_isValidPhone(phone) || _isRateLimited(phone)) {
-      return false;
+  Future<User?> register(String phone, String password) async {
+    if (!_isValidPhone(phone) || !_isValidPassword(password)) {
+      return null;
     }
-
-    final now = DateTime.now();
-    _requestTimes.putIfAbsent(phone, () => <DateTime>[]).add(now);
-    _codes[phone] = _VerificationCode(
-      code: '123456',
-      expiresAt: now.add(const Duration(minutes: 5)),
-    );
-    return true;
+    if (_passwords.containsKey(phone)) {
+      return null;
+    }
+    _passwords[phone] = password;
+    return _createSession(phone);
   }
 
   @override
-  Future<User?> login(String phone, String code) async {
-    if (!_isValidPhone(phone)) {
+  Future<User?> login(String phone, String password) async {
+    if (!_isValidPhone(phone) || _passwords[phone] != password) {
       return null;
     }
+    return _createSession(phone);
+  }
 
-    final verification = _codes[phone];
-    final isValidCode = code == '123456' ||
-        (verification != null &&
-            verification.code == code &&
-            verification.expiresAt.isAfter(DateTime.now()));
-    if (!isValidCode) {
-      return null;
-    }
-
+  Future<User?> _createSession(String phone) async {
     final existing = _store.users.values
         .where((user) => user.phone == phone)
         .cast<User?>()
         .firstWhere((user) => user != null, orElse: () => null);
 
-    final user = existing ??
-        User(
-          id: _uuid.v4(),
-          phone: phone,
-          createdAt: DateTime.now(),
-        );
+    final user =
+        existing ??
+        User(id: _uuid.v4(), phone: phone, createdAt: DateTime.now());
     _store.users[user.id] = user;
 
-    final family = _findFamilyForUser(user.id) ??
+    final family =
+        _findFamilyForUser(user.id) ??
         Family(
           id: _uuid.v4(),
           name: '${phone.substring(phone.length - 4)}的家庭',
@@ -151,24 +139,8 @@ class MockAuthService implements AuthService {
     return null;
   }
 
-  bool _isRateLimited(String phone) {
-    final oneMinuteAgo = DateTime.now().subtract(const Duration(minutes: 1));
-    final recent = (_requestTimes[phone] ?? <DateTime>[])
-        .where((time) => time.isAfter(oneMinuteAgo))
-        .toList();
-    _requestTimes[phone] = recent;
-    return recent.length >= 3;
-  }
-
   bool _isValidPhone(String phone) => RegExp(r'^\+?\d{10,15}$').hasMatch(phone);
-}
 
-class _VerificationCode {
-  const _VerificationCode({
-    required this.code,
-    required this.expiresAt,
-  });
-
-  final String code;
-  final DateTime expiresAt;
+  bool _isValidPassword(String password) =>
+      password.length >= 6 && password.length <= 72;
 }

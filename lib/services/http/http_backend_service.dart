@@ -36,20 +36,24 @@ class HttpBackendService
   }
 
   @override
-  Future<bool> sendVerificationCode(String phone) async {
-    await _client.postData<Map<String, dynamic>>(
-      '/api/auth/send-code',
-      data: {'phone': phone},
+  Future<User?> register(String phone, String password) async {
+    final data = await _client.postData<Map<String, dynamic>>(
+      '/api/auth/register',
+      data: {'phone': phone, 'password': password},
     );
-    return true;
+    return _storeSession(data);
   }
 
   @override
-  Future<User?> login(String phone, String code) async {
+  Future<User?> login(String phone, String password) async {
     final data = await _client.postData<Map<String, dynamic>>(
       '/api/auth/login',
-      data: {'phone': phone, 'code': code},
+      data: {'phone': phone, 'password': password},
     );
+    return _storeSession(data);
+  }
+
+  Future<User?> _storeSession(Map<String, dynamic> data) async {
     final token = data['token'] as String;
     _client.setToken(token);
     _currentUser = User.fromJson(data['user'] as Map<String, dynamic>);

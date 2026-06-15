@@ -2,11 +2,11 @@ import "package:shike_guanjia/models/models.dart";
 
 /// Authentication service interface
 abstract class AuthService {
-  /// Send verification code to phone number
-  Future<bool> sendVerificationCode(String phone);
+  /// Register with phone and password.
+  Future<User?> register(String phone, String password);
 
-  /// Login with phone and verification code
-  Future<User?> login(String phone, String code);
+  /// Login with phone and password.
+  Future<User?> login(String phone, String password);
 
   /// Logout current user
   Future<void> logout();

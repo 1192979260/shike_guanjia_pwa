@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/http/api_client.dart';
 import '../../themes/app_theme.dart';
 import '../../widgets/design/sticker_widgets.dart';
 import '../home/home_screen.dart';
@@ -17,62 +17,72 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneCtrl = TextEditingController();
-  final _codeCtrl = TextEditingController();
-  Timer? _timer;
-  int _countdown = 0;
+  final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
   bool _agreed = true;
+  bool _isRegistering = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    _timer?.cancel();
     _phoneCtrl.dispose();
-    _codeCtrl.dispose();
+    _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _sendCode() async {
-    final phone = _phoneCtrl.text.trim();
-    if (phone.length != 11) {
-      _showMessage('请输入正确的手机号');
-      return;
-    }
-    await context.read<AuthProvider>().sendVerificationCode(phone);
-    setState(() => _countdown = 60);
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) return;
-      setState(() => _countdown--);
-      if (_countdown <= 0) timer.cancel();
-    });
-    _showMessage('验证码已发送，模拟环境任意 6 位数字可登录');
-  }
-
-  Future<void> _login() async {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_agreed) {
       _showMessage('请先阅读并同意用户协议和隐私政策');
       return;
     }
-    final success = await context.read<AuthProvider>().login(
-      _phoneCtrl.text.trim(),
-      _codeCtrl.text.trim(),
-    );
-    if (!mounted) return;
-    if (success) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => context.read<AuthProvider>().onboardingDone
-              ? const HomeScreen()
-              : const OnboardingScreen(),
-        ),
-      );
-    } else {
-      _showMessage('验证码错误，请重新输入');
+    try {
+      final auth = context.read<AuthProvider>();
+      final phone = _phoneCtrl.text.trim();
+      final password = _passwordCtrl.text;
+      final success = _isRegistering
+          ? await auth.register(phone, password)
+          : await auth.login(phone, password);
+      if (!mounted) return;
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => auth.onboardingDone
+                ? const HomeScreen()
+                : const OnboardingScreen(),
+          ),
+        );
+      } else {
+        _showMessage(_isRegistering ? '注册失败，请检查手机号或密码' : '手机号或密码错误');
+      }
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      _showMessage(_messageForApiError(error));
     }
   }
 
   void _showMessage(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  String _messageForApiError(ApiException error) {
+    if (error.code == 'UNAUTHORIZED') return '手机号或密码错误';
+    if (error.code == 'BAD_REQUEST' && _isRegistering) {
+      return error.message == 'Phone already registered'
+          ? '该手机号已注册'
+          : '请检查手机号或密码';
+    }
+    return error.message;
+  }
+
+  void _toggleMode() {
+    setState(() {
+      _isRegistering = !_isRegistering;
+      _confirmPasswordCtrl.clear();
+      _formKey.currentState?.reset();
+    });
   }
 
   @override
@@ -144,9 +154,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('欢迎回来', style: theme.textTheme.titleLarge),
+                      Text(
+                        _isRegistering ? '创建账号' : '欢迎回来',
+                        style: theme.textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 6),
-                      Text('输入手机号，开启有序的一天', style: theme.textTheme.bodyMedium),
+                      Text(
+                        _isRegistering ? '用手机号和密码创建你的家庭账号' : '输入手机号和密码，开启有序的一天',
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       const SizedBox(height: 22),
                       TextFormField(
                         controller: _phoneCtrl,
@@ -164,62 +180,111 @@ class _LoginScreenState extends State<LoginScreen> {
                             : null,
                       ),
                       const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _codeCtrl,
-                              keyboardType: TextInputType.number,
-                              maxLength: 6,
-                              decoration: const InputDecoration(
-                                labelText: '验证码',
-                                hintText: '6 位数字',
-                                prefixIcon: Icon(Icons.verified_user_rounded),
-                                counterText: '',
-                              ),
-                              validator: (value) =>
-                                  value == null || value.trim().length != 6
-                                  ? '请输入验证码'
-                                  : null,
+                      TextFormField(
+                        controller: _passwordCtrl,
+                        obscureText: _obscurePassword,
+                        textInputAction: _isRegistering
+                            ? TextInputAction.next
+                            : TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: '密码',
+                          hintText: '至少 6 位',
+                          prefixIcon: const Icon(Icons.lock_rounded),
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword ? '显示密码' : '隐藏密码',
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 112,
-                            child: OutlinedButton(
-                              onPressed: _countdown > 0 ? null : _sendCode,
-                              child: Text(
-                                _countdown > 0 ? '${_countdown}s' : '获取验证码',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
+                        validator: (value) => value == null || value.length < 6
+                            ? '请输入至少 6 位密码'
+                            : null,
+                      ),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        child: _isRegistering
+                            ? Padding(
+                                key: const ValueKey('confirm-password'),
+                                padding: const EdgeInsets.only(top: 14),
+                                child: TextFormField(
+                                  controller: _confirmPasswordCtrl,
+                                  obscureText: _obscureConfirmPassword,
+                                  textInputAction: TextInputAction.done,
+                                  decoration: InputDecoration(
+                                    labelText: '确认密码',
+                                    hintText: '再次输入密码',
+                                    prefixIcon: const Icon(
+                                      Icons.lock_outline_rounded,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      tooltip: _obscureConfirmPassword
+                                          ? '显示密码'
+                                          : '隐藏密码',
+                                      onPressed: () => setState(
+                                        () => _obscureConfirmPassword =
+                                            !_obscureConfirmPassword,
+                                      ),
+                                      icon: Icon(
+                                        _obscureConfirmPassword
+                                            ? Icons.visibility_rounded
+                                            : Icons.visibility_off_rounded,
+                                      ),
+                                    ),
+                                  ),
+                                  validator: (value) =>
+                                      value != _passwordCtrl.text
+                                      ? '两次输入的密码不一致'
+                                      : null,
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Checkbox(
-                            value: _agreed,
-                            activeColor: AppTheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            onChanged: (value) =>
-                                setState(() => _agreed = value ?? false),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: auth.isLoading ? null : _toggleMode,
+                          child: Text(
+                            _isRegistering ? '已有账号，去登录' : '没有账号，立即注册',
                           ),
-                          Expanded(
-                            child: Text(
-                              '我已阅读并同意《用户协议》与《隐私政策》',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        child: _isRegistering
+                            ? Row(
+                                key: const ValueKey('agreement'),
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Checkbox(
+                                    value: _agreed,
+                                    activeColor: AppTheme.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    onChanged: (value) => setState(
+                                      () => _agreed = value ?? false,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      '我已阅读并同意《用户协议》与《隐私政策》',
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      SizedBox(height: _isRegistering ? 12 : 18),
                       ElevatedButton.icon(
-                        onPressed: auth.isLoading ? null : _login,
+                        onPressed: auth.isLoading ? null : _submit,
                         icon: auth.isLoading
                             ? const SizedBox(
                                 width: 18,
@@ -228,8 +293,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.arrow_forward_rounded),
-                        label: const Text('开启奇妙旅程'),
+                            : Icon(
+                                _isRegistering
+                                    ? Icons.person_add_alt_1_rounded
+                                    : Icons.arrow_forward_rounded,
+                              ),
+                        label: Text(_isRegistering ? '注册并进入' : '登录'),
                       ),
                     ],
                   ),
