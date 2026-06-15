@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../config/app_config.dart';
 
 class ApiException implements Exception {
   ApiException(this.code, this.message, [this.fields]);
@@ -15,12 +16,7 @@ class ApiClient {
   ApiClient({String? baseUrl})
     : _dio = Dio(
         BaseOptions(
-          baseUrl:
-              baseUrl ??
-              const String.fromEnvironment(
-                'API_BASE_URL',
-                defaultValue: 'http://localhost:3000',
-              ),
+          baseUrl: baseUrl ?? AppConfig.apiBaseUrl,
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 20),
           headers: {'content-type': 'application/json'},
