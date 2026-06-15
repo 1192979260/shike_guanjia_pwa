@@ -739,8 +739,41 @@ class _StatsTab extends StatelessWidget {
   }
 }
 
-class _MeTab extends StatelessWidget {
+class _MeTab extends StatefulWidget {
   const _MeTab();
+  @override
+  State<_MeTab> createState() => _MeTabState();
+  void _confirmDeleteChild(BuildContext context, Child child) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定要删除宝贝「${child.name}」吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await context.read<ChildProvider>().removeChild(child.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('已删除宝贝「${child.name}」')),
+                );
+              }
+            },
+            child: const Text('删除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+class _MeTabState extends State<_MeTab> {
 
   @override
   Widget build(BuildContext context) {
