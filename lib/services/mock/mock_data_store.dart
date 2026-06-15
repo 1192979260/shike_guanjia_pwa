@@ -6,6 +6,7 @@ class MockDataStore {
   final children = <String, Child>{};
   final classes = <String, TrainingClass>{};
   final lessons = <String, Lesson>{};
+  final lessonChanges = <String, LessonChangeRecord>{};
   final attendances = <String, Attendance>{};
   final leaves = <String, LeaveRecord>{};
   final syncQueue = <SyncQueueItem>[];
@@ -22,6 +23,7 @@ class MockDataStore {
     children.clear();
     classes.clear();
     lessons.clear();
+    lessonChanges.clear();
     attendances.clear();
     leaves.clear();
     syncQueue.clear();
@@ -51,7 +53,7 @@ class MockDataStore {
           relation: FamilyRelation.mother,
           displayName: "妈妈",
           createdAt: DateTime(2026, 6, 1),
-        )
+        ),
       ],
     );
     families[testFamily.id] = testFamily;
@@ -74,7 +76,11 @@ class MockDataStore {
     return children.values.where((c) => c.familyId == familyId).toList();
   }
 
-  List<TrainingClass> getClassesByFamily(String familyId, {String? childId, ClassStatus? status}) {
+  List<TrainingClass> getClassesByFamily(
+    String familyId, {
+    String? childId,
+    ClassStatus? status,
+  }) {
     return classes.values.where((c) {
       if (c.familyId != familyId) return false;
       if (childId != null && c.childId != childId) return false;
@@ -87,7 +93,12 @@ class MockDataStore {
     return lessons.values.where((l) => l.classId == classId).toList();
   }
 
-  List<Lesson> getLessonsByFamily(String familyId, {String? childId, DateTime? start, DateTime? end}) {
+  List<Lesson> getLessonsByFamily(
+    String familyId, {
+    String? childId,
+    DateTime? start,
+    DateTime? end,
+  }) {
     return lessons.values.where((l) {
       final cls = classes[l.classId];
       if (cls == null || cls.familyId != familyId) return false;

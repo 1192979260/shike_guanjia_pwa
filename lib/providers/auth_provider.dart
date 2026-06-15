@@ -63,6 +63,11 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.logout();
+    await clearLocalSession();
+  }
+
+  Future<void> clearLocalSession() async {
+    await _storage.logout();
     _isLoggedIn = false;
     _phone = null;
     _familyId = null;

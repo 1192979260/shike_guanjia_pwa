@@ -407,6 +407,53 @@ class HttpBackendService
     return Lesson.fromJson(data);
   }
 
+  Future<LessonChangeRecord?> createLessonChange({
+    required String lessonId,
+    required LessonChangeType type,
+    required LessonChangeSource source,
+    required DateTime newScheduledDate,
+    String? reason,
+  }) async {
+    final data = await _client.postData<Map<String, dynamic>>(
+      '/api/lesson-changes',
+      data: {
+        'lessonId': lessonId,
+        'type': type.name,
+        'source': source.name,
+        'reason': reason,
+        'newScheduledDate': _localIso(newScheduledDate),
+      },
+    );
+    return LessonChangeRecord.fromJson(data);
+  }
+
+  Future<bool> cancelLessonChange(String changeId) async {
+    await _client.postData<Map<String, dynamic>>(
+      '/api/lesson-changes/$changeId/cancel',
+    );
+    return true;
+  }
+
+  Future<List<LessonChangeRecord>> getLessonChangeHistory({
+    String? childId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final data = await _client.getData<List<dynamic>>(
+      '/api/lesson-changes/history',
+      queryParameters: {
+        'childId': childId,
+        'startDate': startDate == null ? null : _localIso(startDate),
+        'endDate': endDate == null ? null : _localIso(endDate),
+      },
+    );
+    return data
+        .map(
+          (item) => LessonChangeRecord.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
   Future<Lesson?> updateLesson(
     String lessonId, {
     DateTime? scheduledDate,

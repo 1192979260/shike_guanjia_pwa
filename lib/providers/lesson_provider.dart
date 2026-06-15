@@ -50,7 +50,14 @@ class LessonProvider extends ChangeNotifier {
           end: endAt,
         );
       } else {
-        _lessons = await _lessonService.getUpcomingLessons('', days: 30);
+        final now = DateTime.now();
+        final start = DateTime(now.year, now.month, now.day);
+        final endDay = DateTime(now.year, now.month, now.day + 30);
+        _lessons = await _lessonService.getLessonsInRange(
+          familyId: '',
+          start: start,
+          end: DateTime(endDay.year, endDay.month, endDay.day, 23, 59, 59, 999),
+        );
       }
       await _syncReminders();
     } catch (e) {
@@ -72,6 +79,49 @@ class LessonProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to load today lessons: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> repairMissingInitialLessons(List<TrainingClass> classes) async {
+    final todayStart = DateTime.now();
+    final repairableStart = DateTime(
+      todayStart.year,
+      todayStart.month,
+      todayStart.day,
+    );
+    final targets = classes.where((trainingClass) {
+      if (trainingClass.status != ClassStatus.active) return false;
+      if (trainingClass.startTime.isBefore(repairableStart)) return false;
+      return !_lessons.any(
+        (lesson) =>
+            lesson.classId == trainingClass.id &&
+            lesson.scheduledDate.isAtSameMomentAs(trainingClass.startTime),
+      );
+    }).toList();
+    if (targets.isEmpty) return;
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final repaired = <Lesson>[];
+      for (final trainingClass in targets) {
+        repaired.addAll(await _lessonService.generateLessons(trainingClass));
+      }
+      final byId = {for (final lesson in _lessons) lesson.id: lesson};
+      for (final lesson in repaired) {
+        byId[lesson.id] = lesson;
+      }
+      _lessons = byId.values.toList()
+        ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+      await _syncReminders();
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Failed to repair missing initial lessons: $e');
     }
 
     _isLoading = false;
@@ -178,36 +228,58 @@ class LessonProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> markLeave(String lessonId, String reason) async {
+  Future<bool> changeLesson({
+    required String lessonId,
+    required LessonChangeType type,
+    required LessonChangeSource source,
+    required DateTime newScheduledDate,
+    String? reason,
+  }) async {
     final lesson = _lessons.firstWhere(
       (l) => l.id == lessonId,
       orElse: () => throw Exception('Lesson not found'),
     );
 
-    if (lesson.status == LessonStatus.scheduled) {
-      final updated = lesson.copyWith(
-        status: LessonStatus.leave,
-        leaveReason: reason,
-      );
-
-      _isLoading = true;
+    if (lesson.status != LessonStatus.scheduled) return false;
+    if (newScheduledDate.isBefore(DateTime.now())) {
+      _error = '新上课时间不能早于当前时间';
       notifyListeners();
+      return false;
+    }
 
-      try {
-        await _attendanceService.checkIn(
-          lessonId: lesson.id,
-          classId: lesson.classId,
-          childId: '',
-        );
-        final index = _lessons.indexOf(lesson);
-        _lessons[index] = updated;
-        await _syncReminders();
-      } catch (e) {
-        _error = e.toString();
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final change = await _lessonService.createLessonChange(
+        lessonId: lesson.id,
+        type: type,
+        source: source,
+        newScheduledDate: newScheduledDate,
+        reason: reason,
+      );
+      if (change == null) {
+        _error = '课次变更失败';
+        _isLoading = false;
+        notifyListeners();
+        return false;
       }
-
+      final original = await _lessonService.getLesson(change.lessonId);
+      final replacement = await _lessonService.getLesson(change.newLessonId);
+      if (original != null) _upsertLesson(original);
+      if (replacement != null) _upsertLesson(replacement);
+      _lessons.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+      await _syncReminders();
       _isLoading = false;
       notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Failed to change lesson: $e');
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 
@@ -244,7 +316,9 @@ class LessonProvider extends ChangeNotifier {
     final now = DateTime.now();
     final endAt = DateTime(now.year, now.month, now.day + days);
     return _lessons.where((l) {
-      return !l.scheduledDate.isBefore(now) && !l.scheduledDate.isAfter(endAt);
+      return l.status == LessonStatus.scheduled &&
+          !l.scheduledDate.isBefore(now) &&
+          !l.scheduledDate.isAfter(endAt);
     }).toList();
   }
 
@@ -272,5 +346,16 @@ class LessonProvider extends ChangeNotifier {
 
   Future<void> _syncReminders() async {
     await _reminderProvider?.updateLessons(_lessons);
+  }
+
+  void _upsertLesson(Lesson lesson) {
+    final index = _lessons.indexWhere((item) => item.id == lesson.id);
+    if (index >= 0) {
+      _lessons[index] = lesson;
+    } else {
+      _lessons.add(lesson);
+    }
+    final todayIndex = _todayLessons.indexWhere((item) => item.id == lesson.id);
+    if (todayIndex >= 0) _todayLessons[todayIndex] = lesson;
   }
 }

@@ -94,19 +94,22 @@ class ChildProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> removeChild(String childId) async {
+  Future<bool> removeChild(String childId) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
       await _childService.deleteChild(childId);
       _children.removeWhere((c) => c.id == childId);
+      return true;
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to remove child: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 }

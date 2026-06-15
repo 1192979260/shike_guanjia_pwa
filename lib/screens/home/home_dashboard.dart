@@ -106,7 +106,7 @@ class HomeDashboard extends StatelessWidget {
   Widget _upcomingCard(BuildContext context, List<dynamic> classes, List<dynamic> lessons) {
     final theme = Theme.of(context);
     final now = DateTime.now();
-    final endAt = DateTime(now.year, now.month, now.day + 3);
+    final endAt = now.add(const Duration(days: 3));
 
     final upcoming = lessons.where((l) {
       return !l.scheduledDate.isBefore(now) && !l.scheduledDate.isAfter(endAt);

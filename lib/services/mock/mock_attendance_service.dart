@@ -23,6 +23,8 @@ class MockAttendanceService implements AttendanceService {
     if (lesson == null ||
         trainingClass == null ||
         lesson.status == LessonStatus.completed ||
+        lesson.status == LessonStatus.leave ||
+        lesson.status == LessonStatus.rescheduled ||
         lesson.status == LessonStatus.cancelled) {
       return null;
     }
@@ -272,7 +274,11 @@ class MockAttendanceService implements AttendanceService {
           lesson.scheduledDate.month == month;
     }).toList();
     final total = lessons
-        .where((item) => item.status != LessonStatus.cancelled)
+        .where(
+          (item) =>
+              item.status != LessonStatus.cancelled &&
+              item.status != LessonStatus.rescheduled,
+        )
         .length;
     final attended = lessons
         .where((item) => item.status == LessonStatus.completed)

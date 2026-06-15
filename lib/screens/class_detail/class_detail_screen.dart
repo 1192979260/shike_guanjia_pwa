@@ -198,6 +198,19 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           lesson.leaveReason ?? '已顺延',
                           AppTheme.warning,
                         ),
+                      for (final lesson
+                          in classLessons
+                              .where(
+                                (l) => l.status == LessonStatus.rescheduled,
+                              )
+                              .toList()
+                              .take(1))
+                        _recordRow(
+                          Icons.swap_horiz_rounded,
+                          '第 ${classLessons.indexOf(lesson) + 1} 课：已调课',
+                          lesson.leaveReason ?? '已安排新时间',
+                          AppTheme.primary,
+                        ),
                     ],
                   ),
                 ),
@@ -207,9 +220,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: _showLeaveSheet,
+                      onPressed: _showLessonChangeSheet,
                       icon: const Icon(Icons.edit_calendar_rounded),
-                      label: const Text('我要请假'),
+                      label: const Text('课次变更'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -397,19 +410,72 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     );
   }
 
-  void _showLeaveSheet() {
-    var reason = '身体不适';
+  void _showLessonChangeSheet() {
+    final lessonProvider = context.read<LessonProvider>();
+    final classLessons =
+        lessonProvider.lessons
+            .where(
+              (lesson) =>
+                  lesson.classId == _cls.id &&
+                  lesson.status == LessonStatus.scheduled,
+            )
+            .toList()
+          ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+    final initialLesson = _nextScheduledLesson(classLessons);
+    if (initialLesson == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('暂无可变更的待上课课次')));
+      return;
+    }
+
+    Lesson selectedLesson = initialLesson;
+    var type = LessonChangeType.leave;
+    var source = LessonChangeSource.student;
+    var reason = '';
+    var newStart = selectedLesson.scheduledDate.add(const Duration(days: 7));
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) {
+          Future<void> pickDateTime() async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: newStart,
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(const Duration(days: 540)),
+            );
+            if (date == null || !context.mounted) return;
+            final time = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(newStart),
+            );
+            if (time == null) return;
+            setSheetState(() {
+              newStart = DateTime(
+                date.year,
+                date.month,
+                date.day,
+                time.hour,
+                time.minute,
+              );
+            });
+          }
+
           return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                18,
+                20,
+                24 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,11 +493,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '申请请假',
+                              '课次变更',
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
                             Text(
-                              '没关系，成长偶尔也需要休息。',
+                              '请假或临时调课后，新课次会参与提醒和打卡。',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
@@ -452,7 +518,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            '${_cls.className}\n${formatDateChinese(DateTime.now())} 18:30',
+                            '${_cls.className}\n原课次：${formatDateChinese(selectedLesson.scheduledDate)} ${formatTime(selectedLesson.scheduledDate)}',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
@@ -460,23 +526,82 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('请假原因', style: Theme.of(context).textTheme.titleSmall),
+                  Text('选择原课次', style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedLesson.id,
+                    items: [
+                      for (final lesson in classLessons)
+                        DropdownMenuItem(
+                          value: lesson.id,
+                          child: Text(
+                            '${formatDateChinese(lesson.scheduledDate)} ${formatTime(lesson.scheduledDate)}',
+                          ),
+                        ),
+                    ],
+                    onChanged: (value) {
+                      final next = classLessons.firstWhere(
+                        (lesson) => lesson.id == value,
+                      );
+                      setSheetState(() {
+                        selectedLesson = next;
+                        newStart = next.scheduledDate.add(
+                          const Duration(days: 7),
+                        );
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text('变更类型', style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 10),
                   Wrap(
-                    children: ['身体不适', '家庭出游', '临时有事']
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: LessonChangeType.values
                         .map(
                           (item) => SoftChip(
-                            label: item,
-                            selected: reason == item,
-                            onTap: () => setSheetState(() => reason = item),
+                            label: _changeTypeLabel(item),
+                            selected: type == item,
+                            onTap: () => setSheetState(() => type = item),
                           ),
                         )
                         .toList(),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    '温馨提示：请假申请通过后，本节课时将自动顺延至课程结束后的下个周期，不会损失课时费。',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  Text('原因归因', style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: LessonChangeSource.values
+                        .map(
+                          (item) => SoftChip(
+                            label: _changeSourceLabel(item),
+                            selected: source == item,
+                            onTap: () => setSheetState(() => source = item),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('新上课时间', style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: pickDateTime,
+                    icon: const Icon(Icons.schedule_rounded),
+                    label: Text(
+                      '${formatDateChinese(newStart)} ${formatTime(newStart)}',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    minLines: 1,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: '原因说明（可选）',
+                      hintText: '例如：老师临时有事、孩子身体不适',
+                    ),
+                    onChanged: (value) => reason = value.trim(),
                   ),
                   const SizedBox(height: 18),
                   Row(
@@ -491,21 +616,36 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            final lessonProvider = context
-                                .read<LessonProvider>();
                             final navigator = Navigator.of(sheetContext);
                             final messenger = ScaffoldMessenger.of(context);
-                            await lessonProvider.createLesson(
-                              classId: _cls.id,
-                              scheduledDate: DateTime.now(),
+                            final success = await lessonProvider.changeLesson(
+                              lessonId: selectedLesson.id,
+                              type: type,
+                              source: source,
+                              newScheduledDate: newStart,
+                              reason: reason.isEmpty ? null : reason,
                             );
+                            if (!mounted) return;
+                            if (!success) {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    lessonProvider.error ?? '课次变更失败',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            await lessonProvider.loadLessons(classId: _cls.id);
                             if (!mounted) return;
                             navigator.pop();
                             messenger.showSnackBar(
-                              const SnackBar(content: Text('请假申请成功，课时已自动顺延')),
+                              SnackBar(
+                                content: Text('${_changeTypeLabel(type)}成功'),
+                              ),
                             );
                           },
-                          child: const Text('确认请假'),
+                          child: const Text('确认变更'),
                         ),
                       ),
                     ],
@@ -517,6 +657,30 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
         },
       ),
     );
+  }
+
+  String _changeTypeLabel(LessonChangeType type) {
+    switch (type) {
+      case LessonChangeType.leave:
+        return '孩子请假';
+      case LessonChangeType.reschedule:
+        return '临时调课';
+    }
+  }
+
+  String _changeSourceLabel(LessonChangeSource source) {
+    switch (source) {
+      case LessonChangeSource.student:
+        return '孩子原因';
+      case LessonChangeSource.teacher:
+        return '老师原因';
+      case LessonChangeSource.institution:
+        return '机构调课';
+      case LessonChangeSource.holiday:
+        return '节假日';
+      case LessonChangeSource.other:
+        return '其他';
+    }
   }
 
   void _showOptions() {

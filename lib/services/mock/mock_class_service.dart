@@ -273,14 +273,18 @@ class MockClassService implements ClassService {
           (lesson) =>
               lesson.classId == trainingClass.id &&
               (lesson.status == LessonStatus.completed ||
-                  lesson.status == LessonStatus.leave),
+                  lesson.status == LessonStatus.leave ||
+                  lesson.status == LessonStatus.rescheduled),
         )
         .length;
     final dates = LessonGenerator.generateLessonDates(
       rule: trainingClass.recurringRule,
       startDate: trainingClass.startTime,
       endDate: trainingClass.endTime,
-      totalLessons: (trainingClass.totalHours - consumedHours).clamp(0, trainingClass.totalHours),
+      totalLessons: (trainingClass.totalHours - consumedHours).clamp(
+        0,
+        trainingClass.totalHours,
+      ),
     );
 
     final lessons = <Lesson>[];

@@ -2,6 +2,7 @@ export 'user.dart';
 export 'child.dart';
 export 'class.dart';
 export 'lesson.dart';
+export 'lesson_change.dart';
 export 'attendance.dart';
 export 'cost_statistics.dart';
 export 'preferences.dart';

@@ -32,6 +32,25 @@ abstract class LessonService {
     required DateTime scheduledDate,
   });
 
+  /// Change a scheduled lesson by leave or temporary reschedule.
+  Future<LessonChangeRecord?> createLessonChange({
+    required String lessonId,
+    required LessonChangeType type,
+    required LessonChangeSource source,
+    required DateTime newScheduledDate,
+    String? reason,
+  });
+
+  /// Cancel a lesson change and restore the original lesson when possible.
+  Future<bool> cancelLessonChange(String changeId);
+
+  /// Get lesson change history.
+  Future<List<LessonChangeRecord>> getLessonChangeHistory({
+    String? childId,
+    DateTime? startDate,
+    DateTime? endDate,
+  });
+
   /// Update lesson
   Future<Lesson?> updateLesson(
     String lessonId, {
@@ -56,4 +75,3 @@ abstract class LessonService {
   /// Remove suspension period
   Future<bool> removeSuspensionPeriod(String classId);
 }
-

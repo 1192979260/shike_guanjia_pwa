@@ -144,6 +144,110 @@ class MockLessonService implements LessonService {
   }
 
   @override
+  Future<LessonChangeRecord?> createLessonChange({
+    required String lessonId,
+    required LessonChangeType type,
+    required LessonChangeSource source,
+    required DateTime newScheduledDate,
+    String? reason,
+  }) async {
+    final lesson = _store.lessons[lessonId];
+    if (lesson == null ||
+        lesson.status != LessonStatus.scheduled ||
+        newScheduledDate.isBefore(DateTime.now())) {
+      return null;
+    }
+    final originalEnd = lesson.scheduledEndDate;
+    final duration = originalEnd == null
+        ? const Duration(hours: 1)
+        : originalEnd.difference(lesson.scheduledDate);
+    final newLesson = lesson.copyWith(
+      id: _uuid.v4(),
+      scheduledDate: newScheduledDate,
+      scheduledEndDate: newScheduledDate.add(duration),
+      status: LessonStatus.scheduled,
+      isMakeup: true,
+      leaveReason: null,
+    );
+    final change = LessonChangeRecord(
+      id: _uuid.v4(),
+      lessonId: lesson.id,
+      classId: lesson.classId,
+      childId: _store.classes[lesson.classId]?.childId ?? '',
+      type: type,
+      source: source,
+      reason: reason,
+      originalStartAt: lesson.scheduledDate,
+      originalEndAt: lesson.scheduledEndDate,
+      newLessonId: newLesson.id,
+      status: LessonChangeStatus.active,
+      createdAt: DateTime.now(),
+    );
+    _store.lessons[lesson.id] = lesson.copyWith(
+      status: type == LessonChangeType.leave
+          ? LessonStatus.leave
+          : LessonStatus.rescheduled,
+      leaveReason: reason,
+    );
+    _store.lessons[newLesson.id] = newLesson;
+    _store.lessonChanges[change.id] = change;
+    return change;
+  }
+
+  @override
+  Future<bool> cancelLessonChange(String changeId) async {
+    final change = _store.lessonChanges[changeId];
+    if (change == null || change.status == LessonChangeStatus.cancelled) {
+      return false;
+    }
+    final newLesson = _store.lessons[change.newLessonId];
+    if (newLesson?.status == LessonStatus.completed) {
+      return false;
+    }
+    _store.lessonChanges[change.id] = LessonChangeRecord(
+      id: change.id,
+      lessonId: change.lessonId,
+      classId: change.classId,
+      childId: change.childId,
+      type: change.type,
+      source: change.source,
+      reason: change.reason,
+      originalStartAt: change.originalStartAt,
+      originalEndAt: change.originalEndAt,
+      newLessonId: change.newLessonId,
+      status: LessonChangeStatus.cancelled,
+      createdAt: change.createdAt,
+    );
+    final original = _store.lessons[change.lessonId];
+    if (original != null) {
+      _store.lessons[original.id] = original.copyWith(
+        status: LessonStatus.scheduled,
+        leaveReason: '',
+      );
+    }
+    _store.lessons.remove(change.newLessonId);
+    return true;
+  }
+
+  @override
+  Future<List<LessonChangeRecord>> getLessonChangeHistory({
+    String? childId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final records = _store.lessonChanges.values.where((change) {
+      if (childId != null && change.childId != childId) return false;
+      if (startDate != null && change.createdAt.isBefore(startDate)) {
+        return false;
+      }
+      if (endDate != null && change.createdAt.isAfter(endDate)) return false;
+      return true;
+    }).toList();
+    records.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return records;
+  }
+
+  @override
   Future<Lesson?> updateLesson(
     String lessonId, {
     DateTime? scheduledDate,

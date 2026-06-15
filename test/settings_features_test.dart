@@ -252,6 +252,40 @@ void main() {
       expect(find.text('测试家庭'), findsOneWidget);
       expect(find.text('宝妈'), findsOneWidget);
     });
+
+    testWidgets('family screen adds a member from bottom sheet', (
+      tester,
+    ) async {
+      final auth = _LoggedInAuthProvider();
+      final familyProvider = FamilyProvider(
+        auth: auth,
+        authService: _FamilyService(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<AuthProvider>.value(value: auth),
+              ChangeNotifierProvider<FamilyProvider>.value(
+                value: familyProvider,
+              ),
+            ],
+            child: const FamilySharingScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('添加家庭成员'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '13800138001');
+      await tester.tap(find.text('确认添加'));
+      await tester.pumpAndSettle();
+
+      expect(familyProvider.members, hasLength(2));
+      expect(find.text('当前家庭最多支持 2 位成员'), findsOneWidget);
+    });
   });
 }
 
@@ -351,6 +385,10 @@ class _FamilyService implements AuthService {
   Future<void> logout() async {}
 
   @override
+  Future<User?> register(String phone, String password) async =>
+      getCurrentUser();
+
+  @override
   Future<bool> removeFamilyMember(String memberId) async {
     final next = _family.members
         .where((member) => member.id != memberId)
@@ -359,9 +397,6 @@ class _FamilyService implements AuthService {
     _family = _family.copyWith(members: next);
     return true;
   }
-
-  @override
-  Future<bool> sendVerificationCode(String phone) async => true;
 }
 
 class _LoggedInAuthProvider extends AuthProvider {

@@ -29,6 +29,7 @@ class FamilyProvider extends ChangeNotifier {
   bool get sessionInvalidated => _sessionInvalidated;
   String? get error => _error;
   bool get canAddMember => _members.length < maxMembers;
+  String? get currentUserId => _authService.getCurrentUser()?.id;
 
   void updateAuth(AuthProvider auth) {
     final wasLoggedIn = _auth.isLoggedIn;
@@ -72,7 +73,11 @@ class FamilyProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> addMember(String phone, FamilyRelation relation) async {
+  Future<bool> addMember(
+    String phone,
+    FamilyRelation relation, {
+    bool refresh = true,
+  }) async {
     if (_isMutating) return false;
     final normalizedPhone = phone.trim();
     if (!_isValidPhone(normalizedPhone)) {
@@ -98,7 +103,9 @@ class FamilyProvider extends ChangeNotifier {
         _error = '添加成员失败，请稍后重试';
         return false;
       }
-      await loadFamily();
+      if (refresh) {
+        await _refreshFamilySnapshot();
+      }
       return true;
     } catch (e) {
       _error = _messageForError(e);
@@ -117,6 +124,12 @@ class FamilyProvider extends ChangeNotifier {
       return false;
     }
 
+    final removedMember = _members
+        .where((member) => member.id == memberId)
+        .cast<FamilyMember?>()
+        .firstWhere((member) => member != null, orElse: () => null);
+    final removesCurrentUser = removedMember?.userId == currentUserId;
+
     _isMutating = true;
     _error = null;
     notifyListeners();
@@ -126,7 +139,12 @@ class FamilyProvider extends ChangeNotifier {
         _error = '移除成员失败，请稍后重试';
         return false;
       }
-      await loadFamily();
+      if (removesCurrentUser) {
+        await _auth.clearLocalSession();
+        clear();
+        return true;
+      }
+      await _refreshFamilySnapshot();
       return true;
     } catch (e) {
       _error = _messageForError(e);
@@ -145,6 +163,19 @@ class FamilyProvider extends ChangeNotifier {
     _sessionInvalidated = false;
     _error = null;
     notifyListeners();
+  }
+
+  Future<void> _refreshFamilySnapshot() async {
+    final family = await _authService.getFamily();
+    if (family == null) {
+      _family = null;
+      _members = [];
+      _sessionInvalidated = true;
+      _error = '家庭不存在或已失效，请重新登录';
+      return;
+    }
+    _family = family;
+    _members = await _authService.getFamilyMembers();
   }
 
   String _messageForError(Object error) {

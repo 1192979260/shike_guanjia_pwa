@@ -23,6 +23,7 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<FamilyProvider>();
+    final currentUserId = provider.currentUserId;
     return Scaffold(
       appBar: AppBar(title: const Text('家庭共享')),
       body: ListView(
@@ -76,8 +77,8 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
                       leading: CircleAvatar(
                         child: Text(_relationInitial(member.relation)),
                       ),
-                      title: Text(member.displayName ?? member.userId),
-                      subtitle: Text(_relationLabel(member.relation)),
+                      title: Text(_memberTitle(member, currentUserId)),
+                      subtitle: Text(_memberSubtitle(member)),
                       trailing: IconButton(
                         tooltip: '移除成员',
                         onPressed: provider.isMutating
@@ -107,77 +108,19 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
   }
 
   Future<void> _showAddSheet(BuildContext context) async {
-    final phoneController = TextEditingController();
-    var relation = FamilyRelation.father;
-    await showModalBottomSheet<void>(
+    final familyProvider = context.read<FamilyProvider>();
+    final added = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final provider = context.watch<FamilyProvider>();
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                20,
-                20,
-                MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('添加成员', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: '手机号',
-                      prefixIcon: Icon(Icons.phone_rounded),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<FamilyRelation>(
-                    initialValue: relation,
-                    decoration: const InputDecoration(labelText: '关系'),
-                    items: FamilyRelation.values
-                        .map(
-                          (item) => DropdownMenuItem(
-                            value: item,
-                            child: Text(_relationLabel(item)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) setState(() => relation = value);
-                    },
-                  ),
-                  const SizedBox(height: 18),
-                  ElevatedButton(
-                    onPressed: provider.isMutating
-                        ? null
-                        : () async {
-                            final ok = await context
-                                .read<FamilyProvider>()
-                                .addMember(phoneController.text, relation);
-                            if (ok && context.mounted) {
-                              Navigator.pop(sheetContext);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('成员已添加')),
-                              );
-                            }
-                          },
-                    child: Text(provider.isMutating ? '添加中...' : '确认添加'),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (_) => _AddFamilyMemberSheet(familyProvider: familyProvider),
     );
-    phoneController.dispose();
+    if (added != true || !context.mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      familyProvider.loadFamily();
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('成员已添加')));
   }
 
   Future<void> _confirmRemove(BuildContext context, FamilyMember member) async {
@@ -199,12 +142,110 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
       ),
     );
     if (confirmed != true || !context.mounted) return;
+    final removingCurrentUser =
+        member.userId == context.read<FamilyProvider>().currentUserId;
     final ok = await context.read<FamilyProvider>().removeMember(member.id);
     if (ok && context.mounted) {
+      if (removingCurrentUser) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/login', (route) => false);
+        return;
+      }
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('成员已移除')));
     }
+  }
+}
+
+class _AddFamilyMemberSheet extends StatefulWidget {
+  const _AddFamilyMemberSheet({required this.familyProvider});
+
+  final FamilyProvider familyProvider;
+
+  @override
+  State<_AddFamilyMemberSheet> createState() => _AddFamilyMemberSheetState();
+}
+
+class _AddFamilyMemberSheetState extends State<_AddFamilyMemberSheet> {
+  final _phoneController = TextEditingController();
+  var _relation = FamilyRelation.father;
+  var _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() => _isSubmitting = true);
+    final ok = await widget.familyProvider.addMember(
+      _phoneController.text,
+      _relation,
+      refresh: false,
+    );
+    if (!mounted) return;
+    if (ok) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+    setState(() => _isSubmitting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(widget.familyProvider.error ?? '添加成员失败，请稍后重试')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('添加成员', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              labelText: '手机号',
+              prefixIcon: Icon(Icons.phone_rounded),
+            ),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<FamilyRelation>(
+            initialValue: _relation,
+            decoration: const InputDecoration(labelText: '关系'),
+            items: FamilyRelation.values
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(_relationLabel(item)),
+                  ),
+                )
+                .toList(),
+            onChanged: _isSubmitting
+                ? null
+                : (value) {
+                    if (value != null) setState(() => _relation = value);
+                  },
+          ),
+          const SizedBox(height: 18),
+          ElevatedButton(
+            onPressed: _isSubmitting ? null : _submit,
+            child: Text(_isSubmitting ? '添加中...' : '确认添加'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -224,4 +265,15 @@ String _relationInitial(FamilyRelation relation) {
     case FamilyRelation.father:
       return '爸';
   }
+}
+
+String _memberTitle(FamilyMember member, String? currentUserId) {
+  final name = member.displayName?.trim();
+  if (name != null && name.isNotEmpty) return name;
+  if (member.userId == currentUserId) return '当前账号';
+  return '家庭成员';
+}
+
+String _memberSubtitle(FamilyMember member) {
+  return _relationLabel(member.relation);
 }

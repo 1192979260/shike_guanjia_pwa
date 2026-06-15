@@ -2,20 +2,22 @@ import 'package:shike_guanjia/data/repositories/base_repository.dart';
 import 'package:shike_guanjia/models/models.dart';
 import 'package:shike_guanjia/services/auth_service.dart';
 
-
 class UserRepository extends BaseRepository {
   UserRepository(this._service);
 
   final AuthService _service;
 
-  Future<RepositoryResult<bool>> sendVerificationCode(String phone) {
-    return guard(() => _service.sendVerificationCode(phone));
+  Future<RepositoryResult<User>> login(String phone, String password) {
+    return guardNullable(
+      () => _service.login(phone, password),
+      notFoundError: 'Invalid phone or password',
+    );
   }
 
-  Future<RepositoryResult<User>> login(String phone, String code) {
+  Future<RepositoryResult<User>> register(String phone, String password) {
     return guardNullable(
-      () => _service.login(phone, code),
-      notFoundError: 'Invalid phone or verification code',
+      () => _service.register(phone, password),
+      notFoundError: 'Registration failed',
     );
   }
 
@@ -46,9 +48,6 @@ class UserRepository extends BaseRepository {
   }
 
   Future<RepositoryResult<Family>> getFamily() {
-    return guardNullable(
-      _service.getFamily,
-      notFoundError: 'Family not found',
-    );
+    return guardNullable(_service.getFamily, notFoundError: 'Family not found');
   }
 }

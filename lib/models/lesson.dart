@@ -3,6 +3,7 @@ enum LessonStatus {
   scheduled, // 待上课
   completed, // 已上课
   leave, // 已请假
+  rescheduled, // 已调课
   cancelled, // 已取消
 }
 

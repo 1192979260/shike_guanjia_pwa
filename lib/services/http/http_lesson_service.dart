@@ -49,6 +49,36 @@ class HttpLessonService implements LessonService {
       _backend.addManualLesson(classId: classId, scheduledDate: scheduledDate);
 
   @override
+  Future<LessonChangeRecord?> createLessonChange({
+    required String lessonId,
+    required LessonChangeType type,
+    required LessonChangeSource source,
+    required DateTime newScheduledDate,
+    String? reason,
+  }) => _backend.createLessonChange(
+    lessonId: lessonId,
+    type: type,
+    source: source,
+    newScheduledDate: newScheduledDate,
+    reason: reason,
+  );
+
+  @override
+  Future<bool> cancelLessonChange(String changeId) =>
+      _backend.cancelLessonChange(changeId);
+
+  @override
+  Future<List<LessonChangeRecord>> getLessonChangeHistory({
+    String? childId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) => _backend.getLessonChangeHistory(
+    childId: childId,
+    startDate: startDate,
+    endDate: endDate,
+  );
+
+  @override
   Future<Lesson?> updateLesson(
     String lessonId, {
     DateTime? scheduledDate,

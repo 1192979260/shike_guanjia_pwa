@@ -9,7 +9,6 @@ import '../../themes/app_theme.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/child_avatar.dart';
 import '../../widgets/design/sticker_widgets.dart';
-import 'home_lesson_summary.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadHomeData(context);
+      context.read<ChildProvider>().loadChildren();
+      context.read<ClassProvider>().loadClasses();
+      context.read<LessonProvider>().loadLessons();
     });
   }
 
@@ -76,60 +77,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-Future<void> _loadHomeData(BuildContext context) async {
-  final childProvider = context.read<ChildProvider>();
-  final classProvider = context.read<ClassProvider>();
-  final lessonProvider = context.read<LessonProvider>();
-  await Future.wait([
-    childProvider.loadChildren(),
-    classProvider.loadClasses(),
-  ]);
-  await lessonProvider.loadLessons();
-  await lessonProvider.repairMissingInitialLessons(classProvider.activeClasses);
-}
-
-class _DashboardTab extends StatefulWidget {
+class _DashboardTab extends StatelessWidget {
   const _DashboardTab();
 
   @override
-  State<_DashboardTab> createState() => _DashboardTabState();
-}
-
-class _DashboardTabState extends State<_DashboardTab> {
-  String? _selectedChildId;
-
-  @override
   Widget build(BuildContext context) {
-    final allClasses = context.watch<ClassProvider>().activeClasses;
-    final lessons = context.watch<LessonProvider>().lessons;
+    final classes = context.watch<ClassProvider>().activeClasses;
     final children = context.watch<ChildProvider>().children;
-    final now = DateTime.now();
-    final effectiveChildId =
-        children.any((child) => child.id == _selectedChildId)
-        ? _selectedChildId
-        : null;
-    final classes = effectiveChildId == null
-        ? allClasses
-        : allClasses.where((cls) => cls.childId == effectiveChildId).toList();
-    final selectedChild = effectiveChildId == null
-        ? null
-        : children.where((child) => child.id == effectiveChildId).firstOrNull;
-    final todayLessons = buildTodayLessonSummaries(
-      lessons: lessons,
-      classes: classes,
-      now: now,
+    final totalRemaining = classes.fold<int>(
+      0,
+      (sum, cls) => sum + cls.remainingHours,
     );
-    final upcomingLessons = buildUpcomingLessonSummaries(
-      lessons: lessons,
-      classes: classes,
-      now: now,
+    final monthCost = classes.fold<double>(
+      0,
+      (sum, cls) =>
+          sum +
+          cls.feePerHour * (cls.usedHours == 0 ? 1 : cls.usedHours.clamp(1, 4)),
     );
-    final nextTodayLesson = todayLessons.isNotEmpty ? todayLessons.first : null;
+    final firstClass = classes.isNotEmpty ? classes.first : null;
 
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
-          await _loadHomeData(context);
+          context.read<ChildProvider>().loadChildren();
+          context.read<ClassProvider>().loadClasses();
+          context.read<LessonProvider>().loadLessons();
         },
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
@@ -145,9 +117,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       Text(
-                        selectedChild != null
-                            ? '${selectedChild.name}妈'
-                            : children.isNotEmpty
+                        children.isNotEmpty
                             ? '${children.first.name}妈'
                             : '课时管家',
                         style: Theme.of(context).textTheme.headlineMedium,
@@ -167,18 +137,8 @@ class _DashboardTabState extends State<_DashboardTab> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  SoftChip(
-                    label: '全部宝贝',
-                    selected: effectiveChildId == null,
-                    onTap: () => setState(() => _selectedChildId = null),
-                  ),
-                  ...children.map(
-                    (child) => SoftChip(
-                      label: child.name,
-                      selected: effectiveChildId == child.id,
-                      onTap: () => setState(() => _selectedChildId = child.id),
-                    ),
-                  ),
+                  const SoftChip(label: '全部宝贝', selected: true),
+                  ...children.map((child) => SoftChip(label: child.name)),
                   SoftChip(
                     label: '添加',
                     icon: Icons.add_rounded,
@@ -207,15 +167,15 @@ class _DashboardTabState extends State<_DashboardTab> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          nextTodayLesson?.trainingClass.courseName ?? '今日无课',
+                          firstClass?.courseName ?? '今日无课',
                           style: Theme.of(context).textTheme.headlineMedium
                               ?.copyWith(color: AppTheme.textInverse),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          nextTodayLesson == null
+                          firstClass == null
                               ? '可以安排一次复盘或休息'
-                              : '${lessonTimeRange(nextTodayLesson.lesson)} · ${nextTodayLesson.trainingClass.institutionName} · 剩余 ${nextTodayLesson.trainingClass.remainingHours} 课时',
+                              : '${_ruleString(firstClass.recurringRule)} · 剩余 ${firstClass.remainingHours} 课时',
                           style: const TextStyle(
                             color: AppTheme.textInverse,
                             fontWeight: FontWeight.w700,
@@ -232,32 +192,68 @@ class _DashboardTabState extends State<_DashboardTab> {
                 ],
               ),
             ),
-            const SectionTitle(title: '未来 3 天'),
-            ..._upcomingRows(
-              context,
-              upcomingLessons,
-              hasClasses: classes.isNotEmpty,
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: _metric(
+                    context,
+                    Icons.auto_stories_rounded,
+                    '剩余课时',
+                    '$totalRemaining',
+                    AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _metric(
+                    context,
+                    Icons.payments_rounded,
+                    '本月消费',
+                    formatCurrency(monthCost),
+                    AppTheme.accent,
+                  ),
+                ),
+              ],
             ),
+            const SectionTitle(title: '未来 3 天'),
+            ..._upcomingRows(context, classes),
           ],
         ),
       ),
     );
   }
 
+  Widget _metric(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
+    return StickerCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          StickerIcon(icon: icon, backgroundColor: color, size: 42),
+          const SizedBox(height: 14),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text(value, style: Theme.of(context).textTheme.titleLarge),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _upcomingRows(
     BuildContext context,
-    List<HomeLessonSummary> lessons, {
-    required bool hasClasses,
-  }) {
-    if (!hasClasses) {
+    List<TrainingClass> classes,
+  ) {
+    if (classes.isEmpty) {
       return [const StickerCard(child: Text('还没有课程，先新建一个班级吧。'))];
     }
-    if (lessons.isEmpty) {
-      return [const StickerCard(child: Text('未来 3 天暂无课程安排'))];
-    }
-    return lessons.map((summary) {
-      final lesson = summary.lesson;
-      final cls = summary.trainingClass;
+    return classes.take(3).map((cls) {
       return StickerCard(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
@@ -280,7 +276,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   Text(
-                    '${formatDateShort(lesson.scheduledDate)} ${weekdayChinese(lesson.scheduledDate)} ${lessonTimeRange(lesson)} • ${cls.institutionName}',
+                    '${_ruleString(cls.recurringRule)} • ${cls.institutionName}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -297,110 +293,71 @@ class _DashboardTabState extends State<_DashboardTab> {
   }
 }
 
-class _ScheduleTab extends StatefulWidget {
+class _ScheduleTab extends StatelessWidget {
   const _ScheduleTab();
 
   @override
-  State<_ScheduleTab> createState() => _ScheduleTabState();
-}
-
-class _ScheduleTabState extends State<_ScheduleTab> {
-  String? _selectedChildId;
-
-  @override
   Widget build(BuildContext context) {
-    final children = context.watch<ChildProvider>().children;
-    final childProvider = context.watch<ChildProvider>();
     final classes = context.watch<ClassProvider>().activeClasses;
     final lessons = context.watch<LessonProvider>().lessons;
+    
+    // Get today's lessons
     final now = DateTime.now();
-    final effectiveChildId =
-        children.any((child) => child.id == _selectedChildId)
-        ? _selectedChildId
-        : null;
-    final filteredClasses = effectiveChildId == null
-        ? classes
-        : classes.where((cls) => cls.childId == effectiveChildId).toList();
-    final todayLessons = buildTodayLessonSummaries(
-      lessons: lessons,
-      classes: filteredClasses,
-      now: now,
-    );
-    final selectedChild = effectiveChildId == null
-        ? null
-        : children.where((child) => child.id == effectiveChildId).firstOrNull;
-
+    final todayLessons = lessons.where((l) {
+      return l.scheduledDate.year == now.year &&
+          l.scheduledDate.month == now.month &&
+          l.scheduledDate.day == now.day;
+    }).toList();
+    
     return SafeArea(
-      child: RefreshIndicator(
-        onRefresh: () async {
-          await _loadHomeData(context);
-        },
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-          children: [
-            _topTitle(
-              context,
-              '课时管家',
-              '${now.year}年${now.month}月',
-              Icons.calendar_month_rounded,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+        children: [
+          _topTitle(context, '课时管家', '2024年九月', Icons.calendar_month_rounded),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 44,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: const [
+                SoftChip(label: '全部宝贝', selected: true),
+                SoftChip(label: '乐乐'),
+                SoftChip(label: '朵朵'),
+              ],
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 44,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  SoftChip(
-                    label: '全部宝贝',
-                    selected: effectiveChildId == null,
-                    onTap: () => setState(() => _selectedChildId = null),
-                  ),
-                  ...children.map(
-                    (child) => SoftChip(
-                      label: child.name,
-                      selected: effectiveChildId == child.id,
-                      onTap: () => setState(() => _selectedChildId = child.id),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SectionTitle(
-              title: selectedChild == null
-                  ? '今日课程'
-                  : '${selectedChild.name}的今日课程',
-              trailing: '${todayLessons.length} 节课',
-            ),
-            if (children.isEmpty && childProvider.isLoading)
-              const StickerCard(child: Text('正在加载宝贝列表...'))
-            else if (todayLessons.isEmpty)
-              StickerCard(
-                child: Text(
-                  selectedChild == null
-                      ? '今日暂无课程'
-                      : '${selectedChild.name}今日暂无课程',
-                ),
-              ),
-            ...todayLessons.map(
-              (summary) => _lessonCard(
-                context,
-                summary.lesson,
-                summary.trainingClass,
-                _childName(children, summary.trainingClass.childId),
-              ),
-            ),
-          ],
-        ),
+          ),
+          SectionTitle(title: '今日课程', trailing: '${todayLessons.length} 节课'),
+          if (todayLessons.isEmpty) const StickerCard(child: Text('今日暂无课程')),
+          ...todayLessons.map((l) => _lessonCard(context, l, classes)),
+        ],
       ),
     );
   }
 
-  Widget _lessonCard(
-    BuildContext context,
-    Lesson lesson,
-    TrainingClass cls,
-    String childName,
-  ) {
+  Widget _lessonCard(BuildContext context, Lesson lesson, List<TrainingClass> classes) {
+    // Find the class for this lesson
+    final cls = classes.firstWhere(
+      (c) => c.id == lesson.classId,
+      orElse: () => TrainingClass(
+        id: '',
+        childId: '',
+        familyId: '',
+        institutionName: '',
+        className: '',
+        courseName: '未知课程',
+        totalHours: 0,
+        remainingHours: 0,
+        totalFee: 0,
+        startTime: DateTime.now(),
+        recurringRule: RecurringRule(type: RecurringRuleType.weekly),
+        status: ClassStatus.active,
+        createdAt: DateTime.now(),
+      ),
+    );
+    
+    final startTime = '${lesson.scheduledDate.hour.toString().padLeft(2, '0')}:${lesson.scheduledDate.minute.toString().padLeft(2, '0')}';
+    final endTime = '${(lesson.scheduledDate.hour + 1).toString().padLeft(2, '0')}:${lesson.scheduledDate.minute.toString().padLeft(2, '0')}';
+    
     return StickerCard(
       margin: const EdgeInsets.only(bottom: 14),
       onTap: () =>
@@ -416,70 +373,22 @@ class _ScheduleTabState extends State<_ScheduleTab> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cls.courseName,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      childName,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                child: Text(
+                  cls.courseName,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              _statusPill(
-                _lessonStatusLabel(lesson.status),
-                _lessonStatusColor(lesson.status),
-              ),
+              _statusPill('待上课', AppTheme.accent),
             ],
           ),
           const SizedBox(height: 14),
-          _meta(Icons.schedule_rounded, lessonTimeRange(lesson)),
+          _meta(Icons.schedule_rounded, '$startTime - $endTime'),
           _meta(Icons.location_on_rounded, cls.institutionName),
         ],
       ),
     );
   }
-
-  String _childName(List<Child> children, String childId) {
-    for (final child in children) {
-      if (child.id == childId) return child.name;
-    }
-    return '未命名宝贝';
-  }
-
-  String _lessonStatusLabel(LessonStatus status) {
-    switch (status) {
-      case LessonStatus.scheduled:
-        return '待上课';
-      case LessonStatus.completed:
-        return '已上课';
-      case LessonStatus.leave:
-        return '已请假';
-      case LessonStatus.rescheduled:
-        return '已调课';
-      case LessonStatus.cancelled:
-        return '已取消';
-    }
-  }
-
-  Color _lessonStatusColor(LessonStatus status) {
-    switch (status) {
-      case LessonStatus.scheduled:
-        return AppTheme.accent;
-      case LessonStatus.completed:
-        return AppTheme.sage;
-      case LessonStatus.leave:
-        return AppTheme.clay;
-      case LessonStatus.rescheduled:
-        return AppTheme.primary;
-      case LessonStatus.cancelled:
-        return AppTheme.error;
-    }
-  }
+}
 }
 
 class _ClassesTab extends StatelessWidget {
@@ -487,15 +396,10 @@ class _ClassesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final classProvider = context.watch<ClassProvider>();
-    final children = context.watch<ChildProvider>().children;
-    final classes = classProvider.filteredClasses;
-    final courses = classProvider.uniqueCourses;
+    final classes = context.watch<ClassProvider>().classes;
     final active = classes
         .where((cls) => cls.status == ClassStatus.active)
         .toList();
-    final ended = classes.where((cls) => cls.status == ClassStatus.ended);
-    final hasAnyClass = classProvider.classes.isNotEmpty;
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 92),
@@ -511,55 +415,23 @@ class _ClassesTab extends StatelessWidget {
             height: 44,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              children: [
-                SoftChip(
-                  label: '全部宝贝',
-                  selected: classProvider.selectedChildId == null,
-                  onTap: () =>
-                      context.read<ClassProvider>().setChildFilter(null),
-                ),
-                ...children.map(
-                  (child) => SoftChip(
-                    label: child.name,
-                    selected: classProvider.selectedChildId == child.id,
-                    onTap: () =>
-                        context.read<ClassProvider>().setChildFilter(child.id),
-                  ),
-                ),
+              children: const [
+                SoftChip(label: '全部科目', selected: true),
+                SoftChip(label: '美术'),
+                SoftChip(label: '体育'),
+                SoftChip(label: '音乐'),
               ],
             ),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                SoftChip(
-                  label: '全部科目',
-                  selected: classProvider.selectedCourse == null,
-                  onTap: () =>
-                      context.read<ClassProvider>().clearCourseFilter(),
-                ),
-                ...courses.map(
-                  (course) => SoftChip(
-                    label: course,
-                    selected: classProvider.selectedCourse == course,
-                    icon: _courseIcon(course),
-                    onTap: () =>
-                        context.read<ClassProvider>().setCourseFilter(course),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (!hasAnyClass) _emptyClass(context),
-          if (hasAnyClass && classes.isEmpty) _emptyFilterResult(context),
+          if (classes.isEmpty) _emptyClass(context),
           ...active.map((cls) => _classCard(context, cls)),
           const SizedBox(height: 12),
-          if (ended.isNotEmpty) const SectionTitle(title: '已结束'),
-          ...ended.map((cls) => _classCard(context, cls)),
+          if (classes.any((cls) => cls.status == ClassStatus.ended))
+            const SectionTitle(title: '已结束'),
+          ...classes
+              .where((cls) => cls.status == ClassStatus.ended)
+              .map((cls) => _classCard(context, cls)),
         ],
       ),
     );
@@ -591,10 +463,6 @@ class _ClassesTab extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _emptyFilterResult(BuildContext context) {
-    return const StickerCard(child: Text('当前筛选条件下暂无班级'));
   }
 
   Widget _classCard(BuildContext context, TrainingClass cls) {
@@ -638,27 +506,9 @@ class _ClassesTab extends StatelessWidget {
           const SizedBox(height: 16),
           OrganicProgressBar(value: progress, color: AppTheme.primary),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '课程进度  ${cls.usedHours} / ${cls.totalHours} 节课',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-              Text(
-                '总费用 ${formatCurrency(cls.totalFee)}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
           Text(
-            '客单价 ${formatCurrency(cls.feePerHour)}/课',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.primaryDark,
-              fontWeight: FontWeight.w900,
-            ),
+            '课程进度  ${cls.usedHours} / ${cls.totalHours} 节课',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),
           Row(
@@ -761,63 +611,24 @@ class _ClassesTab extends StatelessWidget {
   }
 }
 
-class _StatsTab extends StatefulWidget {
+class _StatsTab extends StatelessWidget {
   const _StatsTab();
 
   @override
-  State<_StatsTab> createState() => _StatsTabState();
-}
-
-class _StatsTabState extends State<_StatsTab> {
-  String? _selectedChildId;
-
-  @override
   Widget build(BuildContext context) {
-    final children = context.watch<ChildProvider>().children;
     final classes = context.watch<ClassProvider>().classes;
-    final selectedChildExists = children.any(
-      (child) => child.id == _selectedChildId,
-    );
-    if (!selectedChildExists) {
-      _selectedChildId = null;
-    }
-    final filteredClasses = _selectedChildId == null
-        ? classes
-        : classes.where((cls) => cls.childId == _selectedChildId).toList();
-    final totalFee = filteredClasses.fold<double>(
-      0,
-      (sum, cls) => sum + cls.totalFee,
-    );
-    final usedHours = filteredClasses.fold<int>(
-      0,
-      (sum, cls) => sum + cls.usedHours,
-    );
-    final totalHours = filteredClasses.fold<int>(
-      0,
-      (sum, cls) => sum + cls.totalHours,
-    );
-    final remainingHours = filteredClasses.fold<int>(
+    final completed = classes.fold<int>(0, (sum, cls) => sum + cls.usedHours);
+    final totalFee = classes.fold<double>(0, (sum, cls) => sum + cls.totalFee);
+    final remaining = classes.fold<int>(
       0,
       (sum, cls) => sum + cls.remainingHours,
     );
-    final consumedValue = filteredClasses.fold<double>(
-      0,
-      (sum, cls) => sum + cls.feePerHour * cls.usedHours,
-    );
-    final remainingValue = filteredClasses.fold<double>(
-      0,
-      (sum, cls) => sum + cls.feePerHour * cls.remainingHours,
-    );
-    final childNames = {for (final child in children) child.id: child.name};
-
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         children: [
-          _statsHeader(context),
-          const SizedBox(height: 14),
-          if (children.isNotEmpty) _childFilter(children),
-          const SizedBox(height: 14),
+          _topTitle(context, '课时管家', '本月成长足迹', Icons.calendar_month_rounded),
+          const SizedBox(height: 18),
           StickerCard(
             color: AppTheme.primary,
             child: Row(
@@ -833,13 +644,14 @@ class _StatsTabState extends State<_StatsTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        formatCurrency(totalFee),
-                        style: Theme.of(context).textTheme.headlineLarge
-                            ?.copyWith(color: AppTheme.textInverse),
+                        '你表现得太棒了！',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AppTheme.textInverse,
+                        ),
                       ),
-                      const Text(
-                        '家庭累计培训缴费',
-                        style: TextStyle(
+                      Text(
+                        '本月已完成 $completed 节课',
+                        style: const TextStyle(
                           color: AppTheme.textInverse,
                           fontWeight: FontWeight.w700,
                         ),
@@ -850,292 +662,111 @@ class _StatsTabState extends State<_StatsTab> {
               ],
             ),
           ),
-          const SectionTitle(title: '费用去向'),
-          _CostDirectionCard(
-            consumedValue: consumedValue,
-            remainingValue: remainingValue,
-            usedHours: usedHours,
-            remainingHours: remainingHours,
-            totalFee: totalFee,
-          ),
-          const SectionTitle(title: '班级费用明细'),
-          if (filteredClasses.isEmpty)
-            StickerCard(
-              child: Text(
-                '还没有可统计的班级费用',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            )
-          else
-            ...filteredClasses.map(
-              (cls) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _ClassCostCard(
-                  cls: cls,
-                  childName: childNames[cls.childId] ?? '宝贝',
-                  totalHoursInScope: totalHours,
-                ),
-              ),
-            ),
-          const SizedBox(height: 72),
-        ],
-      ),
-    );
-  }
-
-  Widget _statsHeader(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('课时管家', style: Theme.of(context).textTheme.bodySmall),
-              Text('培训开支统计', style: Theme.of(context).textTheme.headlineMedium),
-            ],
-          ),
-        ),
-        IconButton.filledTonal(
-          onPressed: () {},
-          icon: const Icon(Icons.savings_rounded),
-        ),
-      ],
-    );
-  }
-
-  Widget _childFilter(List<Child> children) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SoftChip(
-            label: '全部宝贝',
-            selected: _selectedChildId == null,
-            onTap: () => setState(() => _selectedChildId = null),
-          ),
-          ...children.map(
-            (child) => SoftChip(
-              label: child.name,
-              selected: _selectedChildId == child.id,
-              onTap: () => setState(() => _selectedChildId = child.id),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CostDirectionCard extends StatelessWidget {
-  final double consumedValue;
-  final double remainingValue;
-  final int usedHours;
-  final int remainingHours;
-  final double totalFee;
-
-  const _CostDirectionCard({
-    required this.consumedValue,
-    required this.remainingValue,
-    required this.usedHours,
-    required this.remainingHours,
-    required this.totalFee,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final accounted = consumedValue + remainingValue;
-    final consumedRatio = accounted <= 0 ? 0.0 : consumedValue / accounted;
-    return StickerCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
-                child: _ValueColumn(
-                  dotColor: AppTheme.primary,
-                  title: '已消耗价值',
-                  value: formatCurrency(consumedValue),
-                  subtitle: '$usedHours 节已消耗',
+                child: _reportMetric(
+                  context,
+                  '出勤之星',
+                  '$completed',
+                  '/ ${completed + 2} 节课',
+                  Icons.stars_rounded,
                 ),
               ),
-              Container(width: 1, height: 72, color: AppTheme.oat),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
-                child: _ValueColumn(
-                  dotColor: AppTheme.sage,
-                  title: '剩余课时价值',
-                  value: formatCurrency(remainingValue),
-                  subtitle: '$remainingHours 节待消耗',
+                child: _reportMetric(
+                  context,
+                  '记账统计',
+                  formatCurrency(totalFee),
+                  '累计缴费',
+                  Icons.savings_rounded,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: SizedBox(
-              height: 18,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: (consumedRatio * 1000).round().clamp(0, 1000),
-                    child: Container(color: AppTheme.primary),
-                  ),
-                  Expanded(
-                    flex: ((1 - consumedRatio) * 1000).round().clamp(0, 1000),
-                    child: Container(color: AppTheme.sage),
-                  ),
-                ],
-              ),
+          const SectionTitle(title: '课时剩余趋势'),
+          StickerCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: List.generate(7, (index) {
+                    final height = 40.0 + (index % 4) * 18;
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: height,
+                              decoration: BoxDecoration(
+                                color: index == 5
+                                    ? AppTheme.primary
+                                    : AppTheme.oat,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][index],
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  '本周你已经完成了 ${completed.clamp(0, 4)} 节课，剩余 $remaining 课时。',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            '累计缴费 ${formatCurrency(totalFee)}，其中已消耗约 ${formatCurrency(consumedValue)}，剩余课时价值约 ${formatCurrency(remainingValue)}。',
-            style: Theme.of(context).textTheme.bodyMedium,
+          const SectionTitle(title: '本月勋章'),
+          Row(
+            children: const [
+              Expanded(
+                child: _Medal(label: '准时家长', icon: Icons.emoji_events_rounded),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: _Medal(label: '坚持之星', icon: Icons.auto_fix_high_rounded),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: _Medal(label: '爱学习', icon: Icons.favorite_rounded),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-}
 
-class _ValueColumn extends StatelessWidget {
-  final Color dotColor;
-  final String title;
-  final String value;
-  final String subtitle;
-
-  const _ValueColumn({
-    required this.dotColor,
-    required this.title,
-    required this.value,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: dotColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(title, style: Theme.of(context).textTheme.bodyMedium),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        FittedBox(
-          alignment: Alignment.centerLeft,
-          fit: BoxFit.scaleDown,
-          child: Text(value, style: Theme.of(context).textTheme.titleLarge),
-        ),
-        Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-      ],
-    );
-  }
-}
-
-class _ClassCostCard extends StatelessWidget {
-  final TrainingClass cls;
-  final String childName;
-  final int totalHoursInScope;
-
-  const _ClassCostCard({
-    required this.cls,
-    required this.childName,
-    required this.totalHoursInScope,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final consumedValue = cls.feePerHour * cls.usedHours;
-    final remainingValue = cls.feePerHour * cls.remainingHours;
-    final progress = cls.totalHours == 0 ? 0.0 : cls.usedHours / cls.totalHours;
-    final share = totalHoursInScope == 0
-        ? 0.0
-        : cls.totalHours / totalHoursInScope;
-
+  Widget _reportMetric(
+    BuildContext context,
+    String title,
+    String value,
+    String sub,
+    IconData icon,
+  ) {
     return StickerCard(
       padding: const EdgeInsets.all(18),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const StickerIcon(
-                icon: Icons.local_library_rounded,
-                backgroundColor: AppTheme.sand,
-                color: AppTheme.primaryDark,
-                size: 48,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cls.className,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      '$childName · ${cls.courseName}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  formatCurrency(cls.totalFee),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          OrganicProgressBar(
-            value: progress,
-            color: AppTheme.primary,
-            height: 14,
-          ),
+          StickerIcon(icon: icon, backgroundColor: AppTheme.sage, size: 42),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(
-                '已消耗 ${formatCurrency(consumedValue)}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const Spacer(),
-              Text(
-                '剩余 ${formatCurrency(remainingValue)}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '${cls.usedHours}/${cls.totalHours} 课时已消耗 · ${formatCurrency(cls.feePerHour)}/课',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          const SizedBox(height: 12),
-          OrganicProgressBar(value: share, color: AppTheme.sage, height: 10),
+          Text(title, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 2),
+          Text(value, style: Theme.of(context).textTheme.titleLarge),
+          Text(sub, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );
@@ -1144,12 +775,40 @@ class _ClassCostCard extends StatelessWidget {
 
 class _MeTab extends StatefulWidget {
   const _MeTab();
-
   @override
   State<_MeTab> createState() => _MeTabState();
+  void _confirmDeleteChild(BuildContext context, Child child) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定要删除宝贝「${child.name}」吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await context.read<ChildProvider>().removeChild(child.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('已删除宝贝「${child.name}」')),
+                );
+              }
+            },
+            child: const Text('删除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
 
 class _MeTabState extends State<_MeTab> {
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -1213,11 +872,6 @@ class _MeTabState extends State<_MeTab> {
                     subtitle: Text(
                       child.age == null ? '年龄未填写' : '${child.age}岁',
                     ),
-                    trailing: IconButton(
-                      tooltip: '删除宝贝',
-                      onPressed: () => _confirmDeleteChild(context, child),
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
                   ),
                 ),
                 OutlinedButton.icon(
@@ -1235,25 +889,17 @@ class _MeTabState extends State<_MeTab> {
                 _menuItem(
                   context,
                   Icons.family_restroom_rounded,
-                  '家庭共享',
-                  '邀请爸爸',
-                  onTap: () => Navigator.pushNamed(context, '/family_sharing'),
+                  \'家庭共享\',
+                  \'邀请爸爸\',
+                  onTap: () => Navigator.pushNamed(context, \'/family_sharing\'),
                 ),
                 _menuItem(context, Icons.ios_share_rounded, '数据导出', 'CSV/PDF'),
-                _menuItem(
-                  context,
-                  Icons.palette_rounded,
-                  '主题与皮肤选择',
-                  '经典大地贴纸',
-                  onTap: () => Navigator.pushNamed(context, '/theme_selection'),
-                ),
+                _menuItem(context, Icons.palette_rounded, '主题与皮肤选择', '经典大地贴纸'),
                 _menuItem(
                   context,
                   Icons.notifications_active_rounded,
                   '上课提醒设置',
                   '提前 30 分钟',
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/reminder_settings'),
                 ),
                 _menuItem(context, Icons.help_rounded, '帮助中心', '常见问题'),
                 _menuItem(
@@ -1288,51 +934,32 @@ class _MeTabState extends State<_MeTab> {
       ),
     );
   }
+}
 
-  Future<void> _confirmDeleteChild(BuildContext context, Child child) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('删除宝贝'),
-        content: Text('确认删除 ${child.name} 吗？关联的班级、课表和考勤记录也会一起删除。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('取消'),
-          ),
-          FilledButton.tonalIcon(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            icon: const Icon(Icons.delete_outline_rounded),
-            label: const Text('确认删除'),
+class _Medal extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  const _Medal({required this.label, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return StickerCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        children: [
+          StickerIcon(icon: icon, backgroundColor: AppTheme.accent, size: 42),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
     );
-    if (confirmed != true || !context.mounted) return;
-
-    final childProvider = context.read<ChildProvider>();
-    final classProvider = context.read<ClassProvider>();
-    final lessonProvider = context.read<LessonProvider>();
-    final deleted = await childProvider.removeChild(child.id);
-    if (!context.mounted) return;
-
-    if (deleted) {
-      if (classProvider.selectedChildId == child.id) {
-        classProvider.setChildFilter(null);
-      }
-      await Future.wait([
-        classProvider.loadClasses(),
-        lessonProvider.loadLessons(),
-      ]);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('已删除 ${child.name}')));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(childProvider.error ?? '删除失败，请稍后重试')),
-      );
-    }
   }
 }
 
@@ -1419,9 +1046,8 @@ Widget _menuItem(
   BuildContext context,
   IconData icon,
   String title,
-  String subtitle, {
-  VoidCallback? onTap,
-}) {
+  String subtitle,
+) {
   return ListTile(
     contentPadding: EdgeInsets.zero,
     leading: StickerIcon(
@@ -1436,11 +1062,10 @@ Widget _menuItem(
       Icons.chevron_right_rounded,
       color: AppTheme.textTertiary,
     ),
-    onTap:
-        onTap ??
+    onTap: onTap ??
         () => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$title 功能开发中'))),
+              context,
+            ).showSnackBar(SnackBar(content: Text(\'$title 功能开发中\'))),
   );
 }
 
@@ -1486,4 +1111,27 @@ IconData _courseIcon(String text) {
   }
   if (text.contains('英语')) return Icons.auto_stories_rounded;
   return Icons.local_library_rounded;
+}
+
+String _ruleString(RecurringRule rule) {
+  if (rule.type == RecurringRuleType.weekly && rule.daysOfWeek.isNotEmpty) {
+    const labels = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    if (rule.timeSlots.isNotEmpty) {
+      final slots = [...rule.timeSlots]
+        ..sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
+      return slots
+          .map(
+            (slot) =>
+                '${labels[slot.dayOfWeek]} ${_clock(slot.startHour, slot.startMinute)}-${_clock(slot.endHour, slot.endMinute)}',
+          )
+          .join('、');
+    }
+    return '每周${rule.daysOfWeek.map((day) => labels[day]).join('、')}';
+  }
+  if (rule.type == RecurringRuleType.monthly) return '每月固定上课';
+  return '自定义周期';
+}
+
+String _clock(int hour, int minute) {
+  return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
 }

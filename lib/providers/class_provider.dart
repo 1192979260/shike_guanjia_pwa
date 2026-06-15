@@ -13,10 +13,14 @@ class ClassProvider extends ChangeNotifier {
   List<TrainingClass> _classes = [];
   bool _isLoading = false;
   String? _error;
+  String? _selectedChildId;
+  String? _selectedCourse;
 
   List<TrainingClass> get classes => _classes;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get selectedChildId => _selectedChildId;
+  String? get selectedCourse => _selectedCourse;
 
   List<TrainingClass> get activeClasses =>
       _classes.where((c) => c.status == ClassStatus.active).toList();
@@ -24,11 +28,66 @@ class ClassProvider extends ChangeNotifier {
   List<TrainingClass> get endedClasses =>
       _classes.where((c) => c.status == ClassStatus.ended).toList();
 
+  /// Get filtered classes based on selected child and course.
+  List<TrainingClass> get filteredClasses {
+    return _classes.where((c) {
+      if (_selectedChildId != null && c.childId != _selectedChildId) {
+        return false;
+      }
+      if (_selectedCourse != null && c.courseName != _selectedCourse) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  /// Get unique course names from the currently selected child scope.
+  List<String> get uniqueCourses {
+    final courses = _classes
+        .where((c) => _selectedChildId == null || c.childId == _selectedChildId)
+        .map((c) => c.courseName.trim())
+        .where((course) => course.isNotEmpty)
+        .toSet()
+        .toList();
+    courses.sort();
+    return courses;
+  }
+
   ClassProvider({
     required AuthProvider auth,
     ReminderProvider? reminderProvider,
   }) : _auth = auth,
        _reminderProvider = reminderProvider;
+
+  /// Set child filter. Changing child clears course because course options are
+  /// derived from that child's real classes.
+  void setChildFilter(String? childId) {
+    if (_selectedChildId == childId) return;
+    _selectedChildId = childId;
+    _selectedCourse = null;
+    notifyListeners();
+  }
+
+  /// Set course filter.
+  void setCourseFilter(String? course) {
+    if (_selectedCourse == course) return;
+    _selectedCourse = course;
+    notifyListeners();
+  }
+
+  /// Clear course filter
+  void clearCourseFilter() {
+    if (_selectedCourse == null) return;
+    _selectedCourse = null;
+    notifyListeners();
+  }
+
+  void _ensureCourseFilterIsAvailable() {
+    final selectedCourse = _selectedCourse;
+    if (selectedCourse != null && !uniqueCourses.contains(selectedCourse)) {
+      _selectedCourse = null;
+    }
+  }
 
   void updateReminderProvider(ReminderProvider reminderProvider) {
     _reminderProvider = reminderProvider;
@@ -42,6 +101,7 @@ class ClassProvider extends ChangeNotifier {
     try {
       final familyId = _auth.familyId ?? '';
       _classes = await _classService.getClasses(familyId, childId: childId);
+      _ensureCourseFilterIsAvailable();
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to load classes: $e');
@@ -82,6 +142,7 @@ class ClassProvider extends ChangeNotifier {
       );
       if (cls != null) {
         _classes.add(cls);
+        _ensureCourseFilterIsAvailable();
         await _reminderProvider?.rescheduleLessons();
       } else {
         throw StateError('新增班级失败，请稍后重试');
@@ -123,6 +184,7 @@ class ClassProvider extends ChangeNotifier {
       if (index != -1) {
         _classes[index] = nextClass;
       }
+      _ensureCourseFilterIsAvailable();
       await _reminderProvider?.rescheduleLessons();
       return nextClass;
     } catch (e) {
@@ -141,6 +203,7 @@ class ClassProvider extends ChangeNotifier {
     try {
       await _classService.deleteClass(classId);
       _classes.removeWhere((c) => c.id == classId);
+      _ensureCourseFilterIsAvailable();
       await _reminderProvider?.rescheduleLessons();
     } catch (e) {
       _error = e.toString();
