@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lesson Butler - 删除确认</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "warning-orange": "#FF9500",
+                    "secondary-fixed": "#ffdcc5",
+                    "on-tertiary-container": "#67313c",
+                    "text-main": "#4A3F3F",
+                    "surface-tint": "#9d3f51",
+                    "on-secondary-fixed-variant": "#653d1f",
+                    "on-tertiary-fixed-variant": "#6d3641",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "background": "#fff8f9",
+                    "on-secondary-container": "#794e2e",
+                    "inverse-on-surface": "#f6eff0",
+                    "text-muted": "#8E7F7F",
+                    "on-secondary-fixed": "#301400",
+                    "inverse-primary": "#ffb2bc",
+                    "on-surface": "#1d1b1c",
+                    "tertiary-fixed-dim": "#feb2be",
+                    "outline-variant": "#dbc0c2",
+                    "on-tertiary-fixed": "#370b17",
+                    "danger-red": "#FF3B30",
+                    "surface-container": "#f3eced",
+                    "success-green": "#4CD964",
+                    "primary-fixed": "#ffd9dd",
+                    "surface-container-high": "#ede7e8",
+                    "surface-dim": "#dfd8d9",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "tertiary": "#884d58",
+                    "primary-container": "#ff8c9e",
+                    "on-primary-fixed-variant": "#7e273a",
+                    "surface-variant": "#e7e1e2",
+                    "secondary": "#805434",
+                    "surface-container-highest": "#e7e1e2",
+                    "surface-bright": "#fff8f9",
+                    "surface-container-low": "#f9f2f3",
+                    "tertiary-container": "#e39ba7",
+                    "secondary-fixed-dim": "#f4ba93",
+                    "on-surface-variant": "#554244",
+                    "primary-fixed-dim": "#ffb2bc",
+                    "on-primary-container": "#782235",
+                    "error-container": "#ffdad6",
+                    "primary": "#9d3f51",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#323031",
+                    "on-background": "#1d1b1c",
+                    "tertiary-fixed": "#ffd9de",
+                    "on-primary-fixed": "#400012",
+                    "secondary-container": "#fdc39b",
+                    "surface": "#fff8f9",
+                    "on-error": "#ffffff",
+                    "outline": "#887274"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "base": "4px",
+                    "xs": "8px",
+                    "sm": "12px",
+                    "gutter": "12px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "label-md": ["Be Vietnam Pro"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-lg": ["Be Vietnam Pro"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "headline-sm": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fff8f9;
+            color: #4A3F3F;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-shadow {
+            box-shadow: 0 12px 32px rgba(255, 140, 158, 0.15);
+        }
+        .overlay-blur {
+            backdrop-filter: blur(8px);
+            background-color: rgba(64, 0, 18, 0.4);
+        }
+        .modal-bounce {
+            animation: modalBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalBounce {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .sticker-success {
+            animation: stickerPop 0.5s forwards;
+        }
+        @keyframes stickerPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen font-body-md overflow-hidden">
+<!-- Mock Background Content (Dashboard View) -->
+<header class="w-full top-0 sticky bg-background flex items-center justify-between px-container-margin py-md z-10">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden">
+<img alt="Child profile switcher" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1LkVo5_2cuYVei7H6wtLDXHlu-vgMjaNh8qbv3bIwjl22iE9hTXxTDO3xbO07iIJS8J8Q-VFKiV6UWl3s4zb0EAksZUA6ndzKf3mE_iWFIhnsQzasRpSjJGjGPJS2H8FcKYrI_bHzEoNZjOUBQYlbFBJR49Hip4AZBP9x5ntTvcjufXPr4ZDomJixr3JikQilKTvmoNPkYpxCMX-jRYy4l-2TOcXAdputVa2b4e_8Mw_YfWZ7jYS4u5UfLzGG2eYQJWuwCBI2Omxw"/>
+</div>
+<h1 class="font-display-lg text-headline-md text-primary">Lesson Butler</h1>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform" data-icon="calendar_month">calendar_month</span>
+</header>
+<main class="px-container-margin pt-lg space-y-lg opacity-40 select-none pointer-events-none">
+<section class="space-y-md">
+<h2 class="font-headline-sm text-headline-sm text-text-main">我的课程</h2>
+<!-- Dummy Card 1 -->
+<div class="bg-surface-container-lowest p-md rounded-xl custom-shadow space-y-sm">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-primary">乐高创意机器人</h3>
+<span class="bg-secondary-container text-on-secondary-container text-label-md font-label-md px-sm py-base rounded-full">每周三 16:30</span>
+</div>
+<div class="space-y-base">
+<div class="flex justify-between text-label-md text-text-muted">
+<span>剩余课时</span>
+<span>8/12</span>
+</div>
+<div class="w-full h-2 bg-primary-container/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 66%"></div>
+</div>
+</div>
+</div>
+<!-- Dummy Card 2 -->
+<div class="bg-surface-container-lowest p-md rounded-xl custom-shadow space-y-sm">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-primary">少儿芭蕾初级班</h3>
+<span class="bg-secondary-container text-on-secondary-container text-label-md font-label-md px-sm py-base rounded-full">每周六 10:00</span>
+</div>
+<div class="space-y-base">
+<div class="flex justify-between text-label-md text-text-muted">
+<span>剩余课时</span>
+<span>2/10</span>
+</div>
+<div class="w-full h-2 bg-primary-container/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 20%"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Delete Confirmation Modal Overlay -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center px-container-margin overlay-blur transition-opacity duration-300" id="deleteModal">
+<!-- Modal Container -->
+<div class="bg-surface-container-lowest w-full max-w-sm rounded-[32px] p-xl space-y-lg custom-shadow modal-bounce relative overflow-hidden">
+<!-- Visual Decor (Squishy Sticker Background) -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+<!-- Warning Icon Section -->
+<div class="flex justify-center">
+<div class="w-20 h-20 bg-error-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[40px] text-error" data-icon="delete_forever">delete_forever</span>
+</div>
+</div>
+<!-- Text Content -->
+<div class="text-center space-y-sm">
+<h2 class="font-headline-lg text-headline-lg text-text-main">确认删除该班级？</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                    您正在尝试删除 <span class="font-bold text-primary">乐高创意机器人</span>。删除后相关课程记录、考勤及剩余课时<span class="text-danger-red font-bold">数据不可恢复</span>。
+                </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-md pt-base">
+<button class="w-full h-[56px] bg-danger-red text-on-primary font-label-lg text-label-lg rounded-full active:scale-95 transition-all shadow-md shadow-danger-red/20" id="confirmDelete">
+                    确认删除
+                </button>
+<button class="w-full h-[56px] bg-surface-container-high text-text-main font-label-lg text-label-lg rounded-full active:scale-95 transition-all" id="cancelDelete">
+                    我再想想
+                </button>
+</div>
+</div>
+</div>
+<!-- Feedback "Sticker" Toast (Hidden by default) -->
+<div class="fixed inset-0 z-[110] hidden flex items-center justify-center pointer-events-none" id="successToast">
+<div class="bg-success-green text-on-primary px-lg py-md rounded-full shadow-lg flex items-center gap-sm sticker-success">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-lg text-label-lg">已成功移除班级</span>
+</div>
+</div>
+<!-- Bottom Navigation (Shared Component Integration) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-4px_20px_rgba(255,140,158,0.12)] flex justify-around items-center h-20 px-xs pb-safe opacity-40">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="local_library">local_library</span>
+<span class="font-label-md text-label-md">Classes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-md text-label-md">Stats</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Me</span>
+</div>
+</nav>
+<script>
+        const deleteModal = document.getElementById('deleteModal');
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+        const cancelDeleteBtn = document.getElementById('cancelDelete');
+        const successToast = document.getElementById('successToast');
+
+        // Interaction for Cancel Button
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.classList.add('opacity-0');
+            setTimeout(() => {
+                deleteModal.style.display = 'none';
+                // Reset for demo purposes - usually would navigate back
+            }, 300);
+        });
+
+        // Interaction for Confirm Delete
+        confirmDeleteBtn.addEventListener('click', () => {
+            // Simulated delete logic
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+            
+            setTimeout(() => {
+                // Hide modal
+                deleteModal.classList.add('opacity-0');
+                
+                // Show success sticker
+                setTimeout(() => {
+                    deleteModal.style.display = 'none';
+                    successToast.classList.remove('hidden');
+                    
+                    // Hide toast after animation
+                    setTimeout(() => {
+                        successToast.classList.add('opacity-0');
+                        setTimeout(() => {
+                            successToast.classList.add('hidden');
+                            successToast.classList.remove('opacity-0');
+                            // Re-show modal for repeated testing in prototype
+                            deleteModal.style.display = 'flex';
+                            deleteModal.classList.remove('opacity-0');
+                            confirmDeleteBtn.disabled = false;
+                            confirmDeleteBtn.innerHTML = '确认删除';
+                        }, 500);
+                    }, 2000);
+                }, 300);
+            }, 800);
+        });
+
+        // Close on clicking overlay (optional UX pattern)
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                cancelDeleteBtn.click();
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,45 @@
+<h2>Taro 小程序复刻范围确认</h2>
+<p class="subtitle">我已经从 Flutter 端读到这些主要功能面。请先确认本次兄弟目录项目按哪种交付深度推进。</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">Flutter 功能地图</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+        <div class="placeholder"><strong>启动/登录</strong><br>手机号验证码、token 恢复、首次引导</div>
+        <div class="placeholder"><strong>首页五 Tab</strong><br>总览、课表、班级、统计、设置</div>
+        <div class="placeholder"><strong>孩子档案</strong><br>新增/编辑/删除、孩子筛选</div>
+        <div class="placeholder"><strong>培训班</strong><br>新增、编辑、续费、暂停、恢复、结束、删除</div>
+        <div class="placeholder"><strong>课次</strong><br>今日课、区间课、签到、请假、补录、手动加课</div>
+        <div class="placeholder"><strong>统计</strong><br>累计缴费、已消耗、剩余价值、班级费用拆分</div>
+        <div class="placeholder"><strong>家庭共享</strong><br>家庭成员列表、添加/移除成员</div>
+        <div class="placeholder"><strong>偏好设置</strong><br>主题皮肤、提醒配置、本地持久化</div>
+        <div class="placeholder"><strong>云托管接口</strong><br>统一 data/error envelope、Bearer token</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>推荐：完整可用 MVP 复刻</h3>
+      <p>先实现 Taro + React + Zustand + SCSS，小程序可登录、拉真实云托管数据、完成核心增删改查和签到/请假/统计；UI 高保真贴近 Flutter，但优先保证业务闭环。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>像素级全量复刻</h3>
+      <p>更细地复刻所有页面视觉、动效和边缘状态。质量上限更高，但需要更多轮确认和 QA，交付周期明显更长。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>骨架优先</h3>
+      <p>先搭项目、路由、API client、模型和几个主页面占位，后续逐页补齐。最快拿到代码结构，但短期不可作为完整小程序使用。</p>
+    </div>
+  </div>
+</div>

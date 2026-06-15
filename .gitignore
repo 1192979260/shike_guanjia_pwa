@@ -1,0 +1,37 @@
+# Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+
+# Parent directories
+../shike_guanjia_backend/
+../shike_guanjia_pwa/
+../shike_guanjia_taro/
+
+# Web build
+build/web/
+
+# Testing
+coverage/

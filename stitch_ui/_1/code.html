@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>课表 - 课时管家</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sticker-bounce:active { transform: scale(0.95); transition: transform 0.1s ease; }
+        .date-active { background-color: #FF8C9E; color: white; box-shadow: 0 4px 12px rgba(255, 140, 158, 0.3); }
+        .glass-header { backdrop-filter: blur(8px); background-color: rgba(255, 248, 249, 0.8); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-text-main min-h-screen pb-24">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background": "#fff8f9",
+                      "on-primary-fixed-variant": "#7e273a",
+                      "outline": "#887274",
+                      "on-tertiary-fixed": "#370b17",
+                      "tertiary": "#884d58",
+                      "on-secondary": "#ffffff",
+                      "primary": "#9d3f51",
+                      "warning-orange": "#FF9500",
+                      "on-secondary-fixed-variant": "#653d1f",
+                      "surface-tint": "#9d3f51",
+                      "surface-container-low": "#f9f2f3",
+                      "on-error-container": "#93000a",
+                      "tertiary-container": "#e39ba7",
+                      "secondary-fixed": "#ffdcc5",
+                      "primary-fixed": "#ffd9dd",
+                      "on-secondary-container": "#794e2e",
+                      "outline-variant": "#dbc0c2",
+                      "secondary-container": "#fdc39b",
+                      "on-tertiary-container": "#67313c",
+                      "on-surface-variant": "#554244",
+                      "primary-fixed-dim": "#ffb2bc",
+                      "secondary-fixed-dim": "#f4ba93",
+                      "on-error": "#ffffff",
+                      "inverse-on-surface": "#f6eff0",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#6d3641",
+                      "surface": "#fff8f9",
+                      "inverse-surface": "#323031",
+                      "on-background": "#1d1b1c",
+                      "on-primary-fixed": "#400012",
+                      "secondary": "#805434",
+                      "on-secondary-fixed": "#301400",
+                      "primary-container": "#ff8c9e",
+                      "danger-red": "#FF3B30",
+                      "surface-container-lowest": "#ffffff",
+                      "text-main": "#4A3F3F",
+                      "surface-dim": "#dfd8d9",
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#fff8f9",
+                      "inverse-primary": "#ffb2bc",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#feb2be",
+                      "surface-container-high": "#ede7e8",
+                      "on-primary-container": "#782235",
+                      "on-tertiary": "#ffffff",
+                      "success-green": "#4CD964",
+                      "surface-container": "#f3eced",
+                      "surface-container-highest": "#e7e1e2",
+                      "tertiary-fixed": "#ffd9de",
+                      "surface-variant": "#e7e1e2",
+                      "on-surface": "#1d1b1c",
+                      "text-muted": "#8E7F7F"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xs": "8px",
+                      "base": "4px",
+                      "sm": "12px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "container-margin": "20px",
+                      "gutter": "12px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Be Vietnam Pro"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-lg": ["Be Vietnam Pro"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Be Vietnam Pro"],
+                      "body-md": ["Be Vietnam Pro"],
+                      "display-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<!-- Top Navigation Anchor -->
+<header class="w-full top-0 sticky z-40 bg-background flex items-center justify-between px-container-margin py-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container border-2 border-white shadow-sm overflow-hidden">
+<img alt="Child Profile" data-alt="A charming digital illustration of a smiling child's face with a playful expression, rendered in a warm, artistic style with soft lighting. The background is a gentle pastel coral pink, maintaining a nursery-like, encouraging atmosphere for a family-oriented mobile application. The overall aesthetic is soft and tactile, like a high-quality sticker." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlPIJ3E11ueTHktH_l_8YUqo55Ko63uBRmYNHozMWg9Xw_3gqXwMAgwjPnXhLm-8ZXOsyy9qiyuRUHxgFHS95P0PO91PU5xuuxtwoq0MGxc1pWbVOuxTmbh_PVQjaW0H2sI3YC6VKYzntnWTHyqUZXt-wWd0fR4vHFHQNhGT7ZZZ2gCgQest6aSTFr4D89odb8b1f-0y34SEfQX6igvwU5LYaFmRQWP3SP7hD9TrvhcO882peC__-Qd0yjBzgog-Eqf_xndpP11Qs1"/>
+</div>
+<h1 class="font-display-lg text-headline-md-mobile text-primary tracking-tight">课时管家</h1>
+</div>
+<button class="active:scale-95 transition-transform hover:opacity-80">
+<span class="material-symbols-outlined text-primary text-2xl">calendar_month</span>
+</button>
+</header>
+<main class="px-container-margin">
+<!-- Week View Horizontal Scroller -->
+<section class="mt-sm">
+<div class="flex items-center justify-between mb-sm">
+<h2 class="font-headline-sm text-headline-sm text-text-main">2024年九月</h2>
+<div class="flex gap-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_left</span>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+</div>
+</div>
+<!-- Date Scroller -->
+<div class="flex overflow-x-auto no-scrollbar gap-sm py-xs -mx-container-margin px-container-margin snap-x">
+<!-- Day Card (Repeatable) -->
+<script>
+                    const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                    const container = document.currentScript.parentElement;
+                    const today = 12; // Hardcoded simulation
+                    for(let i=5; i<=25; i++) {
+                        const dayName = days[(i-1)%7];
+                        const isActive = i === today;
+                        const hasClass = [10, 12, 13, 15, 18, 20].includes(i);
+                        
+                        const div = document.createElement('div');
+                        div.className = `flex-shrink-0 w-14 h-20 rounded-xl flex flex-col items-center justify-center snap-center transition-all ${isActive ? 'date-active' : 'bg-surface-container-low text-on-surface-variant'}`;
+                        div.innerHTML = `
+                            <span class="text-[10px] font-bold uppercase tracking-wider mb-1">${dayName}</span>
+                            <span class="text-lg font-bold">${i}</span>
+                            ${hasClass ? `<div class="w-1.5 h-1.5 rounded-full mt-1 ${isActive ? 'bg-white' : 'bg-primary-container'}"></div>` : '<div class="h-1.5 mt-1"></div>'}
+                        `;
+                        container.appendChild(div);
+                    }
+                </script>
+</div>
+</section>
+<!-- Child Filter Chips -->
+<section class="mt-lg">
+<div class="flex gap-sm overflow-x-auto no-scrollbar py-2">
+<button class="px-md py-2 rounded-full font-label-lg text-label-lg whitespace-nowrap bg-primary text-white shadow-sm sticker-bounce">
+                    全部宝贝
+                </button>
+<button class="px-md py-2 rounded-full font-label-lg text-label-lg whitespace-nowrap bg-surface-container-highest text-on-surface-variant border border-outline-variant sticker-bounce">
+                    乐乐
+                </button>
+<button class="px-md py-2 rounded-full font-label-lg text-label-lg whitespace-nowrap bg-surface-container-highest text-on-surface-variant border border-outline-variant sticker-bounce">
+                    朵朵
+                </button>
+</div>
+</section>
+<!-- Class List -->
+<section class="mt-lg flex flex-col gap-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-text-main">今日课程</h3>
+<span class="text-label-md text-text-muted">3 节课</span>
+</div>
+<!-- Lesson Card 1 -->
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-[0_4px_20px_rgba(255,140,158,0.08)] flex flex-col gap-sm border border-surface-container">
+<div class="flex justify-between items-start">
+<div class="flex gap-sm">
+<div class="w-12 h-12 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-2xl">palette</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-text-main">创意美术</h4>
+<p class="text-label-md text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span> 09:30 AM - 10:30 AM
+                            </p>
+</div>
+</div>
+<span class="bg-success-green/10 text-success-green px-sm py-1 rounded-full text-[10px] font-bold uppercase">已完成</span>
+</div>
+<div class="flex items-center gap-xs text-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>阳光工作室, 3楼</span>
+</div>
+<div class="flex items-center gap-sm mt-1">
+<div class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+<img alt="Lele" class="rounded-full" data-alt="A close-up portrait of a cheerful child with soft brown hair and a bright smile, looking directly at the camera. The lighting is sunny and warm, creating a welcoming and friendly atmosphere. The art style is clean and digital, with a soft-focus background that keeps the child as the central, joyful focus of the image." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvunUlbbSzQjfTzC6gbGbrWjFWt-ttbEP2O_jHe5HB0EJ3DqhETV0xQhzhUb45RmJCxlauROA7wvke7rvXUlTkITy0rda_JfFnPCLtdQV0DikdqurR8xsevA00C2XpI4nlOpadqFdqFMuoRHgN3taX-VaY6vUJhqRd45Zxo8cM6XQttS3Mko4Y67zdrq3U4INsxZMsS2CnDvoN6NA1PY1DhO81kcyKNJ7i9hcsyXXvTzRU4ElJGgNJJRpap8U8YAog-mPLsqn3Mr2N"/>
+</div>
+<span class="text-label-md font-bold text-on-surface-variant">乐乐</span>
+</div>
+</div>
+<!-- Lesson Card 2 -->
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-[0_4px_20px_rgba(255,140,158,0.08)] flex flex-col gap-sm border-2 border-primary-container relative">
+<div class="absolute -top-3 -right-2 bg-warning-orange text-white text-[10px] font-extrabold px-2 py-1 rounded-md shadow-sm transform rotate-6">下一节</div>
+<div class="flex justify-between items-start">
+<div class="flex gap-sm">
+<div class="w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">pool</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-text-main">游泳基础</h4>
+<p class="text-label-md text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span> 02:00 PM - 03:00 PM
+                            </p>
+</div>
+</div>
+<span class="bg-primary-container/20 text-primary px-sm py-1 rounded-full text-[10px] font-bold uppercase">待上课</span>
+</div>
+<div class="flex items-center gap-xs text-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>水上中心, 4号泳道</span>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+<img alt="DuoDuo" class="rounded-full" data-alt="A high-quality digital illustration of a happy toddler with dark curly hair and sparkling eyes. The child is laughing, capturing a moment of pure joy. The background is a soft, blurred nursery setting with gentle pastel tones. The image style is polished and inviting, with a light-mode aesthetic that fits a parenting and organization app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcQ9-v-ckduhNH2WVtLRsYFX48enoqEsmuDMtzCcFWgY1az_ySifBzspEk_bUg3q3kdthZxJY70GirByrA_STFhyWi2dmWWX_CCC4hZjk7RSM_4SL-T7HKnwBIOeR65xUnWXnm7fYBO5bhMZjLWVcYR_WhWwt1RgbXcSbv4o9bJFubXZKcEEAMcBC0b6PaVWO4ZSWxQmLSqceSuA2RYiyB1rcUrlOclRz4clEi1PvjQXw9ZFQj6J45wWyAQOF4Q-Wz1Ue7Z8_Y5Ybj"/>
+</div>
+<span class="text-label-md font-bold text-on-surface-variant">朵朵</span>
+</div>
+<button class="bg-primary-container text-on-primary-container font-label-lg px-md py-2 rounded-full shadow-md active:scale-95 transition-all">
+                        打卡
+                    </button>
+</div>
+</div>
+<!-- Lesson Card 3 -->
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-[0_4px_20px_rgba(255,140,158,0.08)] flex flex-col gap-sm border border-surface-container opacity-80">
+<div class="flex justify-between items-start">
+<div class="flex gap-sm">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined text-2xl">music_note</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-text-main">钢琴 1 级</h4>
+<p class="text-label-md text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span> 04:30 PM - 05:30 PM
+                            </p>
+</div>
+</div>
+<span class="bg-primary-container/20 text-primary px-sm py-1 rounded-full text-[10px] font-bold uppercase">待上课</span>
+</div>
+<div class="flex items-center gap-xs text-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>旋律音乐厅, 204室</span>
+</div>
+<div class="flex items-center gap-sm mt-1">
+<div class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+<img alt="Lele" class="rounded-full" data-alt="A charming digital illustration of a smiling child's face with a playful expression, rendered in a warm, artistic style with soft lighting. The background is a gentle pastel coral pink, maintaining a nursery-like, encouraging atmosphere for a family-oriented mobile application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKVLrutmHAo6y0GEiIKzqq9GBBwKwbJsc1A4W_g6TOdvPLfErTWAF07oFsIgq-UXRlDmNOvNaDTGOYI5pccsu5z8euzCR8eJXOIgTNh__QjRH7SutLEKRz9KE3d8j-VanIstS78fEfXW4V0jLKJFREZWDAwZcQngw55JIH7mkP535s-yUflT81Noqpv_OIuELUtbpspL7CS_cJW6TwstMUpBwUquVBVw8J2uvc5zyDL-RnZmkKAgMBjyojuEsxwMc-cQ1smbRLF0M4"/>
+</div>
+<span class="text-label-md font-bold text-on-surface-variant">乐乐</span>
+</div>
+</div>
+</section>
+<!-- Empty State Suggestion / Spacer -->
+<div class="mt-xl h-24"></div>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-4px_20px_rgba(255,140,158,0.12)] flex justify-around items-center h-20 px-xs pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-label-md text-label-md">课表</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">local_library</span>
+<span class="font-label-md text-label-md">班级</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-label-md text-label-md">统计</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">我的</span>
+</a>
+</nav>
+<script>
+        // Check-in Interaction Logic
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.innerText.trim() === '打卡') {
+                btn.addEventListener('click', function() {
+                    const originalText = this.innerText;
+                    this.innerHTML = '<span class="material-symbols-outlined text-lg">check</span>';
+                    this.classList.replace('bg-primary-container', 'bg-success-green');
+                    this.classList.add('text-white');
+                    
+                    // Sticker feedback logic
+                    const sticker = document.createElement('div');
+                    sticker.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] text-6xl animate-bounce pointer-events-none';
+                    sticker.innerHTML = '⭐';
+                    document.body.appendChild(sticker);
+                    
+                    setTimeout(() => {
+                        sticker.remove();
+                        this.innerText = '已打卡';
+                        this.disabled = true;
+                        this.classList.replace('active:scale-95', 'opacity-50');
+                    }, 1200);
+                });
+            }
+        });
+    </script>
+</body></html>

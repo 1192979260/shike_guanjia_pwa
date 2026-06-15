@@ -1,0 +1,320 @@
+<html class="light" lang="zh-CN"><head></head><body class="bg-background text-on-surface font-body-md custom-scrollbar pb-24">```html
+
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>课时管家 - 学习报告</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sticker-shadow {
+            box-shadow: 0 4px 20px rgba(255, 140, 158, 0.12);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #fff8f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ffb2bc;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background": "#fff8f9",
+                      "on-primary-fixed-variant": "#7e273a",
+                      "outline": "#887274",
+                      "on-tertiary-fixed": "#370b17",
+                      "tertiary": "#884d58",
+                      "on-secondary": "#ffffff",
+                      "primary": "#9d3f51",
+                      "warning-orange": "#FF9500",
+                      "on-secondary-fixed-variant": "#653d1f",
+                      "surface-tint": "#9d3f51",
+                      "surface-container-low": "#f9f2f3",
+                      "on-error-container": "#93000a",
+                      "tertiary-container": "#e39ba7",
+                      "secondary-fixed": "#ffdcc5",
+                      "primary-fixed": "#ffd9dd",
+                      "on-secondary-container": "#794e2e",
+                      "outline-variant": "#dbc0c2",
+                      "secondary-container": "#fdc39b",
+                      "on-tertiary-container": "#67313c",
+                      "on-surface-variant": "#554244",
+                      "primary-fixed-dim": "#ffb2bc",
+                      "secondary-fixed-dim": "#f4ba93",
+                      "on-error": "#ffffff",
+                      "inverse-on-surface": "#f6eff0",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#6d3641",
+                      "surface": "#fff8f9",
+                      "inverse-surface": "#323031",
+                      "on-background": "#1d1b1c",
+                      "on-primary-fixed": "#400012",
+                      "secondary": "#805434",
+                      "on-secondary-fixed": "#301400",
+                      "primary-container": "#ff8c9e",
+                      "danger-red": "#FF3B30",
+                      "surface-container-lowest": "#ffffff",
+                      "text-main": "#4A3F3F",
+                      "surface-dim": "#dfd8d9",
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#fff8f9",
+                      "inverse-primary": "#ffb2bc",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#feb2be",
+                      "surface-container-high": "#ede7e8",
+                      "on-primary-container": "#782235",
+                      "on-tertiary": "#ffffff",
+                      "success-green": "#4CD964",
+                      "surface-container": "#f3eced",
+                      "surface-container-highest": "#e7e1e2",
+                      "tertiary-fixed": "#ffd9de",
+                      "surface-variant": "#e7e1e2",
+                      "on-surface": "#1d1b1c",
+                      "text-muted": "#8E7F7F"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xs": "8px",
+                      "base": "4px",
+                      "sm": "12px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "container-margin": "20px",
+                      "gutter": "12px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Be Vietnam Pro"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-lg": ["Be Vietnam Pro"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Be Vietnam Pro"],
+                      "body-md": ["Be Vietnam Pro"],
+                      "display-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<!-- Top Navigation Anchor -->
+<header class="bg-background w-full top-0 sticky z-40 flex items-center justify-between px-container-margin py-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-fixed border-2 border-primary-container">
+<img alt="Child profile switcher" class="w-full h-full object-cover" data-alt="A cute, high-quality 3D rendered avatar of a happy child with short dark hair, wearing a cheerful pink t-shirt. The character has soft, rounded features in a modern digital illustration style. The background is a soft pastel circle, fitting a warm and nurturing mother-child ecosystem app design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3gK8CDQX7xPNQFnvQZmlNzVh-tP0Vi8U4aksRtVW-vv7c6vN4tcIMzbEoMB3hLLw3GpuTXYuasQkVIGG5QTy4HNA_IVH22-Iss1suWw1sMUHxVnnqWXn42156TPSuVPbiEsJfxP9OK1xhMIdM0aGgLu-bYyNnOzOhGQbdQF3mvV2w1_Lfgtsax7c8Cuyu3RFjJHf35Tu0VLPS675fhJdfdUR9Is5CZfvSr59IhIZYYEakmJ69kMoaZ3VTz63z3_wDRhLhpDljASgX"/>
+</div>
+<h1 class="font-display-lg text-headline-md-mobile text-primary tracking-tight">课时管家</h1>
+</div>
+<button class="material-symbols-outlined text-primary p-xs active:scale-95 transition-transform">calendar_month</button>
+</header>
+<main class="px-container-margin mt-md space-y-lg">
+<!-- Monthly Overview Card -->
+<section class="relative overflow-hidden rounded-xl bg-primary text-on-primary p-lg sticker-shadow">
+<div class="relative z-10">
+<p class="font-label-lg opacity-90">本月成长足迹</p>
+<h2 class="font-headline-lg-mobile mt-xs">六月学习报告</h2>
+<div class="mt-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="font-headline-sm">你表现得太棒了！</span>
+</div>
+</div>
+<!-- Decorative Elements -->
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary-container rounded-full opacity-30 blur-xl"></div>
+<div class="absolute -right-2 -top-2">
+<span class="material-symbols-outlined text-[64px] text-primary-fixed opacity-20 rotate-12" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+</section>
+<!-- Bento Grid Stats -->
+<div class="grid grid-cols-2 gap-md">
+<!-- Attendance Star Card -->
+<div class="col-span-2 md:col-span-1 bg-surface-container-lowest rounded-xl p-md sticker-shadow flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-tertiary-fixed rounded-full flex items-center justify-center mb-sm">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<h3 class="font-headline-sm text-text-main">出勤之星</h3>
+<div class="mt-xs flex items-baseline gap-xs">
+<span class="text-display-lg font-headline-lg text-primary">12</span>
+<span class="text-on-surface-variant font-label-lg">/ 14 节课</span>
+</div>
+<div class="w-full mt-md bg-outline-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%] rounded-full"></div>
+</div>
+<p class="mt-sm text-label-md text-on-surface-variant">85% 出勤率</p>
+</div>
+<!-- Budget Tracker Card -->
+<div class="col-span-2 md:col-span-1 bg-surface-container-lowest rounded-xl p-md sticker-shadow flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-secondary-fixed rounded-full flex items-center justify-center mb-sm">
+<span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings: 'FILL' 1;">savings</span>
+</div>
+<h3 class="font-headline-sm text-text-main">记账统计</h3>
+<p class="text-display-lg font-headline-lg text-secondary">$342.00</p>
+<p class="mt-xs text-label-md text-on-surface-variant">本月预估支出</p>
+<div class="mt-sm px-xs py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-md">
+                    正常 • 12% 更低
+                </div>
+</div>
+</div>
+<!-- Remaining Lessons Trend -->
+<section class="bg-surface-container-lowest rounded-xl p-md sticker-shadow">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-sm text-text-main">课时剩余趋势</h3>
+<button class="material-symbols-outlined text-on-surface-variant">more_horiz</button>
+</div>
+<div class="h-48 w-full flex items-end justify-between gap-xs px-xs">
+<!-- Bar 1 -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary-container opacity-40 rounded-t-lg transition-all hover:opacity-100" style="height: 90%;"></div>
+<span class="text-label-md text-on-surface-variant">周一</span>
+</div>
+<!-- Bar 2 -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary-container opacity-50 rounded-t-lg transition-all hover:opacity-100" style="height: 75%;"></div>
+<span class="text-label-md text-on-surface-variant">周二</span>
+</div>
+<!-- Bar 3 -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary-container opacity-60 rounded-t-lg transition-all hover:opacity-100" style="height: 80%;"></div>
+<span class="text-label-md text-on-surface-variant">周三</span>
+</div>
+<!-- Bar 4 (Active/Today) -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary rounded-t-lg transition-all" style="height: 60%;"></div>
+<span class="text-label-md text-primary font-bold">周四</span>
+</div>
+<!-- Bar 5 -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary-container opacity-40 rounded-t-lg transition-all hover:opacity-100" style="height: 55%;"></div>
+<span class="text-label-md text-on-surface-variant">周五</span>
+</div>
+<!-- Bar 6 -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary-container opacity-40 rounded-t-lg transition-all hover:opacity-100" style="height: 45%;"></div>
+<span class="text-label-md text-on-surface-variant">周六</span>
+</div>
+<!-- Bar 7 -->
+<div class="flex-1 flex flex-col items-center gap-xs">
+<div class="w-full bg-primary-container opacity-40 rounded-t-lg transition-all hover:opacity-100" style="height: 40%;"></div>
+<span class="text-label-md text-on-surface-variant">周日</span>
+</div>
+</div>
+<p class="mt-lg text-body-md text-on-surface-variant text-center px-md italic">
+                “本周你已经完成了 4 节课，保持良好的势头！”
+            </p>
+</section>
+<!-- Achievements Horizontal Scroll -->
+<section>
+<h3 class="font-headline-sm text-text-main mb-md px-xs">本月勋章</h3>
+<div class="flex gap-md overflow-x-auto pb-md no-scrollbar">
+<div class="min-w-[120px] bg-white p-sm rounded-xl sticker-shadow flex flex-col items-center gap-xs border border-tertiary-container/20">
+<span class="material-symbols-outlined text-warning-orange text-4xl" style="font-variation-settings: 'FILL' 1;">rewarded_ads</span>
+<span class="text-label-md font-bold text-center">准时家长</span>
+</div>
+<div class="min-w-[120px] bg-white p-sm rounded-xl sticker-shadow flex flex-col items-center gap-xs border border-tertiary-container/20">
+<span class="material-symbols-outlined text-success-green text-4xl" style="font-variation-settings: 'FILL' 1;">auto_fix_high</span>
+<span class="text-label-md font-bold text-center">坚持之星</span>
+</div>
+<div class="min-w-[120px] bg-white p-sm rounded-xl sticker-shadow flex flex-col items-center gap-xs border border-tertiary-container/20">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">heart_plus</span>
+<span class="text-label-md font-bold text-center">爱学习</span>
+</div>
+</div>
+</section>
+<!-- Empty State Preview (Next Month teaser) -->
+<section class="bg-surface-container rounded-xl p-lg flex flex-col items-center text-center">
+<div class="w-24 h-24 mb-md animate-float">
+<img alt="Lesson Butler mascot" class="w-full h-full object-contain" data-alt="A friendly, cute robot mascot character with rounded edges and soft pastel pink accents. The character is waving with a joyful expression. The style is a clean, 3D vector illustration with soft ambient shadows, appearing like a sticker on a warm background. The lighting is bright and cheerful, reinforcing a positive parent-focused application environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4ay1SID0vsUDrEwXSK0851QIfJVmVazfhRQuHz28CgjV4-cw5Y2t90pyUCvIVffYHXWSuokXMzZfFFogwFnuB3UFL1tutK94aCtMZbrZZPVKDAy74uhU_sFIJMy3j-H0be5EuKxRp77SgfsuU1J1nm5QJlPEtzyeHYmOcDRH2ai6PSVycxQB8ziUu4C2OiJDiv-XB0dEoTXh80q7VRGZ_VsJvPISGVcbAOPv1CC4Mk-iN16ufAAJuleNtpp70YGSPoYQHgpo7gMlE"/>
+</div>
+<h4 class="font-headline-sm text-text-main">准备好迎接七月了吗？</h4>
+<p class="mt-xs text-body-md text-on-surface-variant max-w-[240px]">
+                继续努力！你的新月度目标即将开始。
+            </p>
+<button class="mt-lg px-xl py-sm bg-primary text-on-primary rounded-full font-label-lg sticker-shadow active:scale-95 transition-all">
+                设定目标
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface-container-lowest shadow-[0_-4px_20px_rgba(255,140,158,0.12)] rounded-t-xl h-20 flex justify-around items-center px-xs pb-safe">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md mt-1">首页</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md mt-1">课表</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">local_library</span>
+<span class="font-label-md text-label-md mt-1">班级</span>
+</button>
+<!-- ACTIVE TAB: Stats -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+<span class="font-label-md text-label-md mt-1 font-bold">统计</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md mt-1">我的</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for bars
+        document.querySelectorAll('.flex-1.flex.flex-col').forEach(container => {
+            container.addEventListener('mouseenter', () => {
+                const bar = container.querySelector('div');
+                bar.style.transform = 'scaleY(1.05)';
+            });
+            container.addEventListener('mouseleave', () => {
+                const bar = container.querySelector('div');
+                bar.style.transform = 'scaleY(1)';
+            });
+        });
+    </script>
+```</body></html>

@@ -1,0 +1,97 @@
+<h2>像素级复刻设计方案 v1</h2>
+<p class="subtitle">目标：在兄弟目录创建 Taro 小程序，接入云托管地址，尽量复刻 Flutter 的业务流程、信息层级和暖色贴纸风格。</p>
+
+<div class="section">
+  <h3>1. 架构</h3>
+  <div class="mockup">
+    <div class="mockup-header">Taro app structure</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="placeholder"><strong>pages/</strong><br>login, onboarding, home tabs, class detail, class form, settings</div>
+        <div class="placeholder"><strong>store/</strong><br>Zustand stores mirror Flutter providers: auth, child, class, lesson, settings</div>
+        <div class="placeholder"><strong>services/</strong><br>request client + API adapters; base URL fixed to cloud hosting</div>
+        <div class="placeholder"><strong>models/</strong><br>TypeScript interfaces, enum string values, camelCase fields</div>
+        <div class="placeholder"><strong>components/</strong><br>StickerCard, ChildAvatar, ClassCard, SoftChip, ProgressBar</div>
+        <div class="placeholder"><strong>theme/</strong><br>warm/fresh/classic tokens mapped from Flutter AppTheme</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 页面复刻</h3>
+  <div class="mockup">
+    <div class="mockup-header">Navigation parity</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:220px 1fr;gap:14px">
+        <div class="mock-sidebar">
+          启动门禁<br>
+          登录<br>
+          首次引导<br>
+          首页 5 Tab<br>
+          班级详情<br>
+          新增/编辑/续费<br>
+          家庭共享<br>
+          主题与提醒
+        </div>
+        <div class="mock-content">
+          <strong>首页五 Tab 保持 Flutter 信息结构：</strong><br>
+          总览显示今日课程、孩子和课程概览；课表显示今日/近期课次；班级页保留孩子优先、课程其次的筛选；统计页保持费用视角；设置页进入家庭共享、主题、提醒和退出登录。
+          <br><br>
+          <strong>详情页保持操作闭环：</strong><br>
+          课次签到、取消签到、请假、补录、手动加课、班级暂停/恢复/结束/删除、编辑后刷新班级和课次。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. 接口和数据</h3>
+  <div class="mockup">
+    <div class="mockup-header">Cloud hosting integration</div>
+    <div class="mockup-body">
+      <div class="placeholder">
+        Base URL: https://shike-backend-269793-9-1252534988.sh.run.tcloudbase.com<br>
+        Request: Taro.request, content-type application/json, authorization Bearer token<br>
+        Response: unwrap data, map error.code/error.message to UI toast or inline error<br>
+        Storage: Taro storage keys mirror Flutter auth_token, auth_phone, family_id, onboarding_done, theme_skin
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. 视觉策略</h3>
+  <div class="mockup">
+    <div class="mockup-header">Organic sticker style</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px">
+        <div style="height:44px;border-radius:18px;background:#C66B3D"></div>
+        <div style="height:44px;border-radius:18px;background:#8B9D83"></div>
+        <div style="height:44px;border-radius:18px;background:#E8DCC7"></div>
+        <div style="height:44px;border-radius:18px;background:#F9F1E3"></div>
+      </div>
+      <div class="placeholder">
+        保留 Flutter 的暖色贴纸方向：沙色背景、圆角贴纸卡片、柔和阴影、圆形头像、胶囊按钮、状态 chip、进度条。小程序里用 SCSS token 统一实现，避免每页散写。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">OK</div>
+    <div class="content">
+      <h3>认可这版设计</h3>
+      <p>我会写入规格文档，做自检，然后进入实现计划。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">改</div>
+    <div class="content">
+      <h3>先调整设计</h3>
+      <p>告诉我需要改的范围：页面、接口、视觉还是什么优先级。</p>
+    </div>
+  </div>
+</div>

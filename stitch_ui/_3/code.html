@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sticker-bounce:active {
+            transform: scale(0.95);
+        }
+        .shadow-soft {
+            box-shadow: 0 12px 24px -4px rgba(255, 140, 158, 0.12);
+        }
+        .journey-line {
+            background-image: radial-gradient(#FFB3BF 2px, transparent 2px);
+            background-size: 12px 12px;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background": "#fff8f9",
+                      "on-primary-fixed-variant": "#7e273a",
+                      "outline": "#887274",
+                      "on-tertiary-fixed": "#370b17",
+                      "tertiary": "#884d58",
+                      "on-secondary": "#ffffff",
+                      "primary": "#9d3f51",
+                      "warning-orange": "#FF9500",
+                      "on-secondary-fixed-variant": "#653d1f",
+                      "surface-tint": "#9d3f51",
+                      "surface-container-low": "#f9f2f3",
+                      "on-error-container": "#93000a",
+                      "tertiary-container": "#e39ba7",
+                      "secondary-fixed": "#ffdcc5",
+                      "primary-fixed": "#ffd9dd",
+                      "on-secondary-container": "#794e2e",
+                      "outline-variant": "#dbc0c2",
+                      "secondary-container": "#fdc39b",
+                      "on-tertiary-container": "#67313c",
+                      "on-surface-variant": "#554244",
+                      "primary-fixed-dim": "#ffb2bc",
+                      "secondary-fixed-dim": "#f4ba93",
+                      "on-error": "#ffffff",
+                      "inverse-on-surface": "#f6eff0",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#6d3641",
+                      "surface": "#fff8f9",
+                      "inverse-surface": "#323031",
+                      "on-background": "#1d1b1c",
+                      "on-primary-fixed": "#400012",
+                      "secondary": "#805434",
+                      "on-secondary-fixed": "#301400",
+                      "primary-container": "#ff8c9e",
+                      "danger-red": "#FF3B30",
+                      "surface-container-lowest": "#ffffff",
+                      "text-main": "#4A3F3F",
+                      "surface-dim": "#dfd8d9",
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#fff8f9",
+                      "inverse-primary": "#ffb2bc",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#feb2be",
+                      "surface-container-high": "#ede7e8",
+                      "on-primary-container": "#782235",
+                      "on-tertiary": "#ffffff",
+                      "success-green": "#4CD964",
+                      "surface-container": "#f3eced",
+                      "surface-container-highest": "#e7e1e2",
+                      "tertiary-fixed": "#ffd9de",
+                      "surface-variant": "#e7e1e2",
+                      "on-surface": "#1d1b1c",
+                      "text-muted": "#8E7F7F"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xs": "8px",
+                      "base": "4px",
+                      "sm": "12px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "container-margin": "20px",
+                      "gutter": "12px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Be Vietnam Pro"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-lg": ["Be Vietnam Pro"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Be Vietnam Pro"],
+                      "body-md": ["Be Vietnam Pro"],
+                      "display-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-40 bg-background flex items-center justify-between px-container-margin py-md">
+<div class="flex items-center gap-sm">
+<div class="relative active:scale-95 transition-transform">
+<img alt="Lele's Mom portrait" class="w-12 h-12 rounded-full border-2 border-primary-container object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAFcKhar2hNyYAuTBC2qQlMkUkDsKHjuIGlH4G7d488nvnl_ggGdFz7yszKgw-6VAMN5twFSDKMFZB2k82EQ0SWQnXgdb3q-DucmvyyoU3i3X-fW5E1TTCYZ-l_l3vG8KkUikr9E53hG5qstfkJ_cZ4r1iUit7Uf8ZX2vbudaxrQcjpFg6ro3u5TEhD-VQN6ogoACxQM17-vxp_1pO54V6zpi-gopqspxy6wCxqBB3SnKCZj0tek6vKKq1w9ZOoXat4cTyafzmprLH"/>
+<div class="absolute -bottom-1 -right-1 bg-success-green w-4 h-4 rounded-full border-2 border-background"></div>
+</div>
+<div>
+<span class="font-label-md text-on-surface-variant block">早上好！</span>
+<h1 class="font-headline-md text-headline-md-mobile text-primary">乐乐妈</h1>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary text-[28px] active:scale-95 transition-transform" data-icon="calendar_month">calendar_month</button>
+</div>
+</header>
+<main class="px-container-margin mt-sm space-y-lg">
+<!-- Child Profile Switcher Tabs -->
+<div class="flex gap-sm overflow-x-auto pb-xs no-scrollbar">
+<button class="bg-primary text-on-primary px-lg py-sm rounded-full font-label-lg shadow-soft whitespace-nowrap active:scale-95 transition-all">乐乐</button>
+<button class="bg-surface-container text-on-surface-variant px-lg py-sm rounded-full font-label-lg whitespace-nowrap active:scale-95 transition-all">咪咪</button>
+<button class="border-2 border-dashed border-outline-variant text-outline px-sm py-sm rounded-full flex items-center justify-center active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Today's Journey Card -->
+<section class="relative">
+<div class="flex items-center justify-between mb-sm">
+<h2 class="font-headline-sm text-on-surface flex items-center gap-xs">
+                    今日旅程
+                    <span class="material-symbols-outlined text-warning-orange animate-pulse" data-icon="sunny">sunny</span>
+</h2>
+<span class="font-label-md text-primary">成长地图</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[20px] p-lg shadow-soft relative overflow-hidden">
+<!-- Background Decorative Stars -->
+<span class="material-symbols-outlined absolute -top-2 -right-2 text-primary-fixed-dim text-[64px] opacity-20 rotate-12" data-icon="star">star</span>
+<div class="relative z-10 flex flex-col items-center text-center py-md">
+<div class="bg-secondary-container/30 p-md rounded-full mb-md animate-float">
+<div class="bg-white p-sm rounded-2xl shadow-sm border border-secondary-container">
+<span class="material-symbols-outlined text-secondary text-[48px]" data-icon="palette">palette</span>
+</div>
+</div>
+<h3 class="font-headline-md text-primary mb-xs">美术课</h3>
+<p class="font-body-md text-on-surface-variant mb-lg flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+                        10:00 AM - 11:30 AM
+                    </p>
+<!-- Progress Indicator -->
+<div class="w-full bg-primary-fixed-dim/20 h-3 rounded-full mb-xl relative overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary-container rounded-full" style="width: 60%;"></div>
+</div>
+<!-- Check-in Button -->
+<button class="bg-primary-container text-on-primary-container px-xl py-md rounded-full font-headline-sm shadow-lg w-full max-w-[240px] flex items-center justify-center gap-sm active:scale-90 transition-all duration-200" id="checkinBtn">
+<span class="material-symbols-outlined" data-icon="grade" style="font-variation-settings: 'FILL' 1;">grade</span>
+                        打卡
+                    </button>
+</div>
+</div>
+</section>
+<!-- Summary Stats Widgets -->
+<div class="grid grid-cols-2 gap-md">
+<div class="bg-secondary-fixed/40 p-md rounded-[20px] shadow-sm border border-secondary-fixed flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_stories">auto_stories</span>
+<div>
+<p class="font-label-md text-on-secondary-container">剩余课时</p>
+<p class="font-display-lg text-secondary">24</p>
+</div>
+</div>
+<div class="bg-tertiary-fixed/40 p-md rounded-[20px] shadow-sm border border-tertiary-fixed flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-tertiary" data-icon="payments">payments</span>
+<div>
+<p class="font-label-md text-on-tertiary-container">本月消费</p>
+<p class="font-display-lg text-tertiary">¥3.2k</p>
+</div>
+</div>
+</div>
+<!-- Next 3 Days -->
+<section>
+<h2 class="font-headline-sm text-on-surface mb-md">未来 3 天</h2>
+<div class="space-y-sm">
+<!-- Day 1 -->
+<div class="flex gap-md group">
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-2xl bg-surface-container flex flex-col items-center justify-center text-on-surface-variant">
+<span class="font-label-md">周三</span>
+<span class="font-headline-sm">24</span>
+</div>
+<div class="w-0.5 h-full bg-outline-variant mt-xs mb-xs opacity-50"></div>
+</div>
+<div class="flex-1 bg-surface-container-lowest p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-headline-sm text-on-surface">钢琴练习</p>
+<p class="font-body-md text-on-surface-variant">04:30 PM • 家里</p>
+</div>
+<div class="bg-warning-orange/10 p-sm rounded-xl">
+<span class="material-symbols-outlined text-warning-orange" data-icon="music_note">music_note</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Day 2 -->
+<div class="flex gap-md group">
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-2xl bg-surface-container flex flex-col items-center justify-center text-on-surface-variant">
+<span class="font-label-md">周四</span>
+<span class="font-headline-sm">25</span>
+</div>
+<div class="w-0.5 h-full bg-outline-variant mt-xs mb-xs opacity-50"></div>
+</div>
+<div class="flex-1 bg-surface-container-lowest p-md rounded-2xl shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-headline-sm text-on-surface">游泳</p>
+<p class="font-body-md text-on-surface-variant">05:00 PM • 体育中心</p>
+</div>
+<div class="bg-primary/10 p-sm rounded-xl">
+<span class="material-symbols-outlined text-primary" data-icon="pool">pool</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Day 3 -->
+<div class="flex gap-md group">
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-2xl bg-surface-container flex flex-col items-center justify-center text-on-surface-variant">
+<span class="font-label-md">周五</span>
+<span class="font-headline-sm">26</span>
+</div>
+</div>
+<div class="flex-1 bg-surface-container-lowest p-md rounded-2xl shadow-sm opacity-60">
+<p class="font-body-md text-on-surface-variant">今日无课</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container-lowest shadow-[0_-4px_20px_rgba(255,140,158,0.12)] flex justify-around items-center h-20 px-xs pb-safe">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-label-md">首页</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">课表</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="local_library">local_library</span>
+<span class="font-label-md text-label-md">班级</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-md text-label-md">统计</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">我的</span>
+</div>
+</nav>
+<!-- Success Sticker Animation Script -->
+<script>
+        document.getElementById('checkinBtn').addEventListener('click', function() {
+            const sticker = document.createElement('div');
+            sticker.innerHTML = `
+                <div class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
+                    <div class="bg-white rounded-full p-8 shadow-2xl animate-bounce border-4 border-primary-container">
+                        <span class="material-symbols-outlined text-[100px] text-primary-container" style="font-variation-settings: 'FILL' 1;">grade</span>
+                        <div class="absolute -top-4 -right-4 bg-warning-orange text-white px-4 py-2 rounded-full font-headline-sm rotate-12">太棒了!</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(sticker);
+            
+            // Confetti effect simulation
+            for(let i=0; i<20; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'fixed z-[99] w-3 h-3 rounded-full pointer-events-none';
+                conf.style.backgroundColor = ['#FF8C9E', '#FFB3BF', '#FFD9DE'][Math.floor(Math.random()*3)];
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = '100vh';
+                conf.style.transition = 'all 2s ease-out';
+                document.body.appendChild(conf);
+                setTimeout(() => {
+                    conf.style.transform = `translate(${(Math.random()-0.5)*300}px, -120vh) rotate(${Math.random()*360}deg)`;
+                    conf.style.opacity = '0';
+                }, 50);
+            }
+
+            setTimeout(() => {
+                sticker.remove();
+                this.innerHTML = `
+                    <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    已打卡！
+                `;
+                this.classList.replace('bg-primary-container', 'bg-success-green');
+                this.classList.replace('text-on-primary-container', 'text-white');
+            }, 1500);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lesson Butler - 请假申请</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "warning-orange": "#FF9500",
+                        "secondary-fixed": "#ffdcc5",
+                        "on-tertiary-container": "#67313c",
+                        "text-main": "#4A3F3F",
+                        "surface-tint": "#9d3f51",
+                        "on-secondary-fixed-variant": "#653d1f",
+                        "on-tertiary-fixed-variant": "#6d3641",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8f9",
+                        "on-secondary-container": "#794e2e",
+                        "inverse-on-surface": "#f6eff0",
+                        "text-muted": "#8E7F7F",
+                        "on-secondary-fixed": "#301400",
+                        "inverse-primary": "#ffb2bc",
+                        "on-surface": "#1d1b1c",
+                        "tertiary-fixed-dim": "#feb2be",
+                        "outline-variant": "#dbc0c2",
+                        "on-tertiary-fixed": "#370b17",
+                        "danger-red": "#FF3B30",
+                        "surface-container": "#f3eced",
+                        "success-green": "#4CD964",
+                        "primary-fixed": "#ffd9dd",
+                        "surface-container-high": "#ede7e8",
+                        "surface-dim": "#dfd8d9",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#884d58",
+                        "primary-container": "#ff8c9e",
+                        "on-primary-fixed-variant": "#7e273a",
+                        "surface-variant": "#e7e1e2",
+                        "secondary": "#805434",
+                        "surface-container-highest": "#e7e1e2",
+                        "surface-bright": "#fff8f9",
+                        "surface-container-low": "#f9f2f3",
+                        "tertiary-container": "#e39ba7",
+                        "secondary-fixed-dim": "#f4ba93",
+                        "on-surface-variant": "#554244",
+                        "primary-fixed-dim": "#ffb2bc",
+                        "on-primary-container": "#782235",
+                        "error-container": "#ffdad6",
+                        "primary": "#9d3f51",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#323031",
+                        "on-background": "#1d1b1c",
+                        "tertiary-fixed": "#ffd9de",
+                        "on-primary-fixed": "#400012",
+                        "secondary-container": "#fdc39b",
+                        "surface": "#fff8f9",
+                        "on-error": "#ffffff",
+                        "outline": "#887274"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "gutter": "12px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "label-lg": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fff8f9;
+            color: #4A3F3F;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sticker-bounce:active {
+            transform: scale(0.96);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .soft-shadow {
+            box-shadow: 0 12px 24px rgba(255, 140, 158, 0.12);
+        }
+        .glass-overlay {
+            background: rgba(255, 248, 249, 0.8);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md">
+<!-- Parent Page Content (Blurred/Overlayed) -->
+<main class="min-h-screen p-container-margin">
+<header class="flex items-center justify-between py-md mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">我的课程</h1>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">person</span>
+</div>
+</header>
+<section class="space-y-md">
+<div class="bg-surface-container-lowest p-lg rounded-xl soft-shadow border border-primary-fixed">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm">创意美术基础班</h3>
+<p class="text-text-muted mt-base">周三 18:30 - 20:00</p>
+</div>
+<span class="bg-success-green/10 text-success-green px-sm py-xs rounded-full text-label-md font-label-md">进行中</span>
+</div>
+<div class="h-2 w-full bg-primary-fixed/30 rounded-full mb-md overflow-hidden">
+<div class="h-full bg-primary-container w-3/4 rounded-full"></div>
+</div>
+<div class="flex justify-between text-label-md mb-lg">
+<span>已上 12 课时</span>
+<span>剩余 4 课时</span>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container h-12 rounded-full font-label-lg sticker-bounce">申请请假</button>
+</div>
+</section>
+</main>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-container-margin glass-overlay" id="leaveModal">
+<!-- Modal Container -->
+<div class="bg-surface-container-lowest w-full max-w-md rounded-[32px] overflow-hidden soft-shadow animate-in fade-in zoom-in duration-300">
+<!-- Header with Illustration -->
+<div class="relative h-48 bg-primary-fixed/20 flex items-center justify-center overflow-hidden">
+<!-- Abstract Decorative Shapes -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/20 rounded-full blur-2xl"></div>
+<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-secondary-container/20 rounded-full blur-2xl"></div>
+<div class="relative z-10 text-center px-lg">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-md soft-shadow">
+<span class="material-symbols-outlined text-primary text-[40px]" style="font-variation-settings: 'FILL' 1;">event_busy</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary">申请请假</h2>
+<p class="text-text-muted text-body-md mt-base">没关系，成长偶尔也需要休息~</p>
+</div>
+</div>
+<!-- Content -->
+<div class="p-lg space-y-lg">
+<!-- Course Info Box -->
+<div class="bg-surface-container p-md rounded-2xl border border-outline-variant/30">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">palette</span>
+</div>
+<div>
+<p class="font-label-lg text-primary">创意美术基础班</p>
+<p class="text-label-md text-text-muted">10月25日 (本周三) 18:30</p>
+</div>
+</div>
+</div>
+<!-- Reason Selection -->
+<div class="space-y-sm">
+<p class="font-label-lg text-text-main px-base">请假原因</p>
+<div class="grid grid-cols-3 gap-sm">
+<button class="reason-chip active px-sm py-md rounded-xl border border-primary-container bg-primary-container text-on-primary-container font-label-md transition-all active:scale-95">
+                            身体不适
+                        </button>
+<button class="reason-chip px-sm py-md rounded-xl border border-outline-variant bg-white text-on-surface-variant font-label-md transition-all hover:bg-surface-container active:scale-95">
+                            家庭出游
+                        </button>
+<button class="reason-chip px-sm py-md rounded-xl border border-outline-variant bg-white text-on-surface-variant font-label-md transition-all hover:bg-surface-container active:scale-95">
+                            临时有事
+                        </button>
+</div>
+</div>
+<!-- Rule Notice -->
+<div class="bg-secondary-fixed/30 p-md rounded-2xl flex gap-sm items-start">
+<span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">info</span>
+<p class="text-body-md text-on-secondary-container leading-relaxed">
+                        温馨提示：请假申请通过后，本节课时将<span class="font-bold">自动顺延</span>至课程结束后的下个周期，不会损失课时费哦。
+                    </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-md pt-sm">
+<button class="flex-1 h-14 rounded-full border-2 border-primary-fixed text-primary font-label-lg sticker-bounce transition-colors hover:bg-primary-fixed/10" id="closeModal">
+                        取消
+                    </button>
+<button class="flex-1 h-14 rounded-full bg-primary text-white font-label-lg sticker-bounce shadow-md" id="confirmLeave">
+                        确认请假
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticker Success Feedback (Hidden by default) -->
+<div class="fixed inset-0 z-[100] hidden items-center justify-center pointer-events-none" id="successSticker">
+<div class="bg-white/90 backdrop-blur-sm p-xl rounded-[40px] soft-shadow flex flex-col items-center animate-bounce">
+<div class="w-24 h-24 bg-success-green rounded-full flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-white text-[64px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="font-headline-md text-primary">请假申请成功</p>
+<p class="text-text-muted mt-xs">课时已自动为您顺延</p>
+</div>
+</div>
+<script>
+        // Modal logic
+        const modal = document.getElementById('leaveModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const confirmLeaveBtn = document.getElementById('confirmLeave');
+        const successSticker = document.getElementById('successSticker');
+        const chips = document.querySelectorAll('.reason-chip');
+
+        // Reason chip selection
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary-container');
+                    c.classList.add('bg-white', 'text-on-surface-variant', 'border-outline-variant');
+                });
+                chip.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary-container');
+                chip.classList.remove('bg-white', 'text-on-surface-variant', 'border-outline-variant');
+            });
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('animate-out', 'fade-out', 'zoom-out', 'duration-200');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 200);
+        });
+
+        confirmLeaveBtn.addEventListener('click', () => {
+            // Hide modal
+            modal.style.display = 'none';
+            
+            // Show sticker animation
+            successSticker.classList.remove('hidden');
+            successSticker.classList.add('flex');
+            
+            // Reset for demo purposes after 3 seconds
+            setTimeout(() => {
+                successSticker.classList.add('hidden');
+                successSticker.classList.remove('flex');
+                modal.style.display = 'flex';
+                modal.classList.remove('animate-out', 'fade-out', 'zoom-out');
+            }, 3000);
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModalBtn.click();
+            }
+        });
+    </script>
+</body></html>

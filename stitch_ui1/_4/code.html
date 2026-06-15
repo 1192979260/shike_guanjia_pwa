@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "warning-orange": "#FF9500",
+                        "secondary-fixed": "#ffdcc5",
+                        "on-tertiary-container": "#67313c",
+                        "text-main": "#4A3F3F",
+                        "surface-tint": "#9d3f51",
+                        "on-secondary-fixed-variant": "#653d1f",
+                        "on-tertiary-fixed-variant": "#6d3641",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8f9",
+                        "on-secondary-container": "#794e2e",
+                        "inverse-on-surface": "#f6eff0",
+                        "text-muted": "#8E7F7F",
+                        "on-secondary-fixed": "#301400",
+                        "inverse-primary": "#ffb2bc",
+                        "on-surface": "#1d1b1c",
+                        "tertiary-fixed-dim": "#feb2be",
+                        "outline-variant": "#dbc0c2",
+                        "on-tertiary-fixed": "#370b17",
+                        "danger-red": "#FF3B30",
+                        "surface-container": "#f3eced",
+                        "success-green": "#4CD964",
+                        "primary-fixed": "#ffd9dd",
+                        "surface-container-high": "#ede7e8",
+                        "surface-dim": "#dfd8d9",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#884d58",
+                        "primary-container": "#ff8c9e",
+                        "on-primary-fixed-variant": "#7e273a",
+                        "surface-variant": "#e7e1e2",
+                        "secondary": "#805434",
+                        "surface-container-highest": "#e7e1e2",
+                        "surface-bright": "#fff8f9",
+                        "surface-container-low": "#f9f2f3",
+                        "tertiary-container": "#e39ba7",
+                        "secondary-fixed-dim": "#f4ba93",
+                        "on-surface-variant": "#554244",
+                        "primary-fixed-dim": "#ffb2bc",
+                        "on-primary-container": "#782235",
+                        "error-container": "#ffdad6",
+                        "primary": "#9d3f51",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#323031",
+                        "on-background": "#1d1b1c",
+                        "tertiary-fixed": "#ffd9de",
+                        "on-primary-fixed": "#400012",
+                        "secondary-container": "#fdc39b",
+                        "surface": "#fff8f9",
+                        "on-error": "#ffffff",
+                        "outline": "#887274"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "gutter": "12px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "label-lg": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fff8f9;
+            color: #1d1b1c;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sticker-card {
+            box-shadow: 0 4px 20px rgba(255, 140, 158, 0.12);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .sticker-card:active {
+            transform: scale(0.98);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .progress-bar-fill {
+            transition: width 1s ease-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-background z-40 flex items-center justify-between px-container-margin py-md">
+<div class="flex items-center gap-md">
+<button class="active:scale-95 transition-transform text-primary">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile text-primary">创意美术基础班</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:opacity-80">calendar_month</span>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img alt="Child profile switcher" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXKovv6rGysHOcf418T0rjEGJ90zsS1mekhIQkmgrOhutAXub10Ju1pTI9D8UsSdO2Fw6D02iqcUPNx6CbHZEUmZOGyJ29nOwNLoQmTSL0llSJTPwejatn0IGrffvlSAX_mhCrpMjDbJETNbWECdekrf2Meg7_CBZpYA6H8vIoW9WJ6RKzgMiNn1I429y8Vqs9oE5cOuAVbZfSOAPfVebjqx3S1bCwn2kpfe4QqRxKOSZlHEjJw9_PnyDa-96e27ygSFwTHZVyFSr6"/>
+</div>
+</div>
+</header>
+<main class="px-container-margin py-md space-y-lg">
+<!-- Lesson Progress Section (Tactile Bento) -->
+<section class="sticker-card bg-surface-container-lowest p-lg rounded-xl relative overflow-hidden">
+<div class="flex justify-between items-end mb-sm">
+<div>
+<span class="font-label-md text-label-md text-text-muted">课时进度</span>
+<div class="flex items-baseline gap-xs">
+<span class="font-headline-lg text-headline-lg-mobile text-primary">12</span>
+<span class="font-body-md text-body-md text-text-muted">/ 20 课时</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-warning-orange font-bold">剩余 8 课时</span>
+</div>
+</div>
+<!-- Custom Progress Bar -->
+<div class="h-4 w-full bg-primary/10 rounded-full overflow-hidden">
+<div class="progress-bar-fill h-full bg-primary-container rounded-full" style="width: 60%"></div>
+</div>
+<!-- Decorative "Sticker" Background Element -->
+<div class="absolute -right-4 -top-4 opacity-5 rotate-12">
+<span class="material-symbols-outlined text-[120px]">palette</span>
+</div>
+</section>
+<!-- Schedule & Info Grid -->
+<div class="grid grid-cols-1 gap-md">
+<!-- Next Class Info -->
+<div class="sticker-card bg-surface-container-lowest p-md rounded-xl flex items-start gap-md">
+<div class="w-12 h-12 bg-secondary-fixed rounded-xl flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-secondary-fixed-variant">event_available</span>
+</div>
+<div class="flex-1">
+<h3 class="font-label-lg text-label-lg text-text-main mb-1">下次上课时间</h3>
+<p class="font-body-md text-body-md text-text-main">本周六 10:30 - 12:00</p>
+<p class="font-label-md text-label-md text-text-muted">2023年10月28日</p>
+</div>
+</div>
+<!-- Location -->
+<div class="sticker-card bg-surface-container-lowest p-md rounded-xl flex items-start gap-md">
+<div class="w-12 h-12 bg-tertiary-fixed rounded-xl flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant">location_on</span>
+</div>
+<div class="flex-1">
+<h3 class="font-label-lg text-label-lg text-text-main mb-1">上课地点</h3>
+<p class="font-body-md text-body-md text-text-main">艺苗艺术中心 A302教室</p>
+<p class="font-label-md text-label-md text-primary underline">在地图中查看</p>
+</div>
+</div>
+<!-- Teacher Contact -->
+<div class="sticker-card bg-surface-container-lowest p-md rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A warm and friendly female art teacher portrait in a pixel art style, set against a soft peach background that complements the brand's nurturing and educational theme. The image is bright and professional yet approachable, fitting perfectly into a clean and modern parenting application UI with high-key lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjhkSgbnJi9SWxCQxivqUcxxNBSnXy533Qf5c1bvXWVx24bFKUkaBNpeseRJGO_eUrYXmZNPucVEfmhGj8BzoFtaRC-TCejMu0l2odUTcUrxjEFa1itQy1L7OsDfpYEUxKYcwvAJntkO7km1cpYpP9_lL3ggPDgG6liFEPhmVE-Cq6cSIbAENRZtKQtXaKl-O0KnciHK3_hHAbAU0IAy2tqj_Z99vBX7x8knC011rRKreLPkD2sfjgVSWso8cnmAT3Kgjo4mG4cLra"/>
+</div>
+<div>
+<h3 class="font-label-lg text-label-lg text-text-main">林老师 (Lin Laoshi)</h3>
+<p class="font-label-md text-label-md text-text-muted">主要授课老师</p>
+</div>
+</div>
+<div class="flex gap-sm">
+<button class="w-10 h-10 rounded-full bg-success-green/10 flex items-center justify-center text-success-green active:scale-90 transition-all">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary active:scale-90 transition-all">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Fee Summary -->
+<section class="space-y-sm">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-sm text-headline-sm text-text-main px-base">费用信息摘要</h2>
+</div>
+<div class="sticker-card bg-primary/5 border border-primary-fixed p-md rounded-xl grid grid-cols-2 gap-md">
+<div>
+<p class="font-label-md text-label-md text-text-muted">剩余课时价值</p>
+<p class="font-headline-sm text-headline-sm text-primary">¥ 1,280.00</p>
+</div>
+<div class="text-right">
+<p class="font-label-md text-label-md text-text-muted">已缴总费</p>
+<p class="font-body-md text-body-md text-text-main">¥ 3,200 (20课)</p>
+</div>
+</div>
+</section>
+<!-- Attendance Records -->
+<section class="space-y-sm">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-sm text-headline-sm text-text-main px-base">近期上课记录</h2>
+<button class="text-primary font-label-md text-label-md">查看全部</button>
+</div>
+<div class="space-y-xs">
+<!-- Record Item 1 -->
+<div class="sticker-card bg-surface-container-lowest p-md rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center text-success-green">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-text-main">第 12 课：色彩融合</p>
+<p class="font-label-md text-label-md text-text-muted">10月21日 10:30-12:00</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-muted">chevron_right</span>
+</div>
+<!-- Record Item 2 -->
+<div class="sticker-card bg-surface-container-lowest p-md rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center text-success-green">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-text-main">第 11 课：静物写生</p>
+<p class="font-label-md text-label-md text-text-muted">10月14日 10:30-12:00</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-muted">chevron_right</span>
+</div>
+<!-- Record Item 3 (Absence/Leave) -->
+<div class="sticker-card bg-surface-container-lowest p-md rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-warning-orange/10 rounded-full flex items-center justify-center text-warning-orange">
+<span class="material-symbols-outlined">event_busy</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-text-main">第 10 课：请假中</p>
+<p class="font-label-md text-label-md text-text-muted">10月07日 10:30-12:00</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-muted">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Buttons (Sticky) -->
+<div class="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-md px-container-margin pt-sm pb-safe-bottom z-50 shadow-[0_-4px_20px_rgba(255,140,158,0.08)]">
+<div class="flex gap-md py-sm">
+<button class="flex-1 min-h-[48px] bg-white border-2 border-primary-container text-primary font-label-lg text-label-lg rounded-full active:scale-95 transition-all flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined">edit_calendar</span>
+                我要请假
+            </button>
+<button class="flex-1 min-h-[48px] bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full active:scale-95 transition-all flex items-center justify-center gap-xs shadow-md" onclick="showCheckinAnimation()">
+<span class="material-symbols-outlined">verified</span>
+                上课打卡
+            </button>
+</div>
+</div>
+<!-- Sticker Animation Overlay (Hidden by default) -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 hidden backdrop-blur-sm pointer-events-none" id="checkin-animation">
+<div class="bg-white rounded-3xl p-xl sticker-card flex flex-col items-center animate-bounce">
+<div class="text-primary-container mb-md">
+<span class="material-symbols-outlined text-[80px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary mb-xs">打卡成功!</h2>
+<p class="font-body-md text-body-md text-text-muted">又完成了一次精彩的课程！</p>
+</div>
+</div>
+<script>
+        function showCheckinAnimation() {
+            const overlay = document.getElementById('checkin-animation');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            // Interaction: Haptic-like scale down then reset
+            setTimeout(() => {
+                overlay.classList.add('opacity-0');
+                overlay.style.transition = 'opacity 0.5s ease-out';
+            }, 1500);
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex', 'opacity-0');
+                overlay.style.transition = '';
+            }, 2000);
+        }
+    </script>
+</body></html>

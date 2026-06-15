@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>添加宝贝 - Lesson Butler</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e7e1e2",
+                    "on-tertiary-fixed": "#370b17",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#ffdcc5",
+                    "primary-fixed-dim": "#ffb2bc",
+                    "surface-container-high": "#ede7e8",
+                    "outline": "#887274",
+                    "tertiary-container": "#e39ba7",
+                    "surface-bright": "#fff8f9",
+                    "surface-tint": "#9d3f51",
+                    "surface": "#fff8f9",
+                    "on-secondary-fixed-variant": "#653d1f",
+                    "surface-variant": "#e7e1e2",
+                    "surface-container-low": "#f9f2f3",
+                    "on-primary-fixed-variant": "#7e273a",
+                    "error-container": "#ffdad6",
+                    "text-muted": "#8E7F7F",
+                    "on-secondary-container": "#794e2e",
+                    "primary": "#9d3f51",
+                    "on-background": "#1d1b1c",
+                    "inverse-primary": "#ffb2bc",
+                    "background": "#fff8f9",
+                    "surface-container": "#f3eced",
+                    "tertiary": "#884d58",
+                    "tertiary-fixed-dim": "#feb2be",
+                    "on-tertiary-container": "#67313c",
+                    "secondary": "#805434",
+                    "inverse-surface": "#323031",
+                    "text-main": "#4A3F3F",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffd9de",
+                    "on-primary-container": "#782235",
+                    "inverse-on-surface": "#f6eff0",
+                    "secondary-container": "#fdc39b",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#301400",
+                    "outline-variant": "#dbc0c2",
+                    "surface-dim": "#dfd8d9",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#400012",
+                    "on-surface": "#1d1b1c",
+                    "secondary-fixed-dim": "#f4ba93",
+                    "on-tertiary-fixed-variant": "#6d3641",
+                    "danger-red": "#FF3B30",
+                    "warning-orange": "#FF9500",
+                    "primary-container": "#ff8c9e",
+                    "primary-fixed": "#ffd9dd",
+                    "success-green": "#4CD964",
+                    "on-surface-variant": "#554244"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "12px",
+                    "2xl": "20px",
+                    "3xl": "32px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "gutter": "12px",
+                    "xs": "8px",
+                    "md": "16px",
+                    "base": "4px",
+                    "lg": "24px",
+                    "container-margin": "20px",
+                    "sm": "12px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-lg": ["Be Vietnam Pro"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-md": ["Be Vietnam Pro"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Be Vietnam Pro"]
+            },
+            "fontSize": {
+                    "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fff8f9;
+            color: #1d1b1c;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .soft-shadow {
+            box-shadow: 0 12px 24px rgba(255, 140, 158, 0.12);
+        }
+        .input-focus-effect:focus-within {
+            border-color: #ff8c9e;
+            border-width: 2px;
+            padding-left: 14px;
+        }
+        .sticker-bounce:active {
+            transform: scale(0.96);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col font-body-md text-body-md">
+<!-- Top Navigation Bar -->
+<header class="bg-background w-full top-0 sticky flex items-center justify-between px-container-margin py-md z-10">
+<button class="active:scale-95 transition-transform hover:opacity-80 flex items-center">
+<span class="material-symbols-outlined text-primary text-2xl">arrow_back_ios</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile text-primary">添加宝贝</h1>
+<div class="w-8"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-1 px-container-margin pt-lg pb-xl max-w-md mx-auto w-full">
+<!-- Avatar Upload Section -->
+<div class="flex flex-col items-center mb-xl">
+<div class="relative group">
+<div class="w-32 h-32 rounded-3xl bg-surface-container-low flex items-center justify-center overflow-hidden soft-shadow border-4 border-white">
+<img class="w-full h-full object-cover" data-alt="A warm and soft focus photography of a cozy child nursery corner with a plush teddy bear and soft morning sunlight. The aesthetic is clean, minimalist, and domestic, reflecting the Nurture and Play brand with a palette of soft coral pinks and creamy whites. High-key lighting creates a joyful and safe atmosphere for mothers and children." id="avatar-preview" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9FXruOZE87UzYpKC5bNznsdEt3ibtAS5KzVKpzIrvtTqtory-PpkNOdpMGZY6CzdKShAxshRJIrBHvVZJDg64GshljVFxcP2xOyne5NL_axkNIqIo0va11oZMOOWtdk4zLY_Z37OUQb5wowKpMktZwCz3b7omR9o_diBRccybifQmaZEeCuqdJaZuLNx53jKOA9-v8ethonQVm1_zIaKutk3X4IrzIp01Uckjw9aSUZiWgpbtqk8oHsGRE8soST5Tx2j2GJ2JLhkm"/>
+</div>
+<label class="absolute -bottom-2 -right-2 bg-primary-container text-white p-3 rounded-2xl soft-shadow cursor-pointer sticker-bounce transition-all active:scale-90" for="avatar-input">
+<span class="material-symbols-outlined">add_a_photo</span>
+<input accept="image/*" class="hidden" id="avatar-input" type="file"/>
+</label>
+</div>
+<p class="mt-md font-label-md text-label-md text-on-surface-variant">点击更换宝贝头像</p>
+</div>
+<!-- Form Fields -->
+<div class="space-y-lg">
+<div class="group">
+<label class="block mb-xs font-label-lg text-label-lg text-on-surface-variant ml-1">宝贝姓名</label>
+<div class="input-focus-effect flex items-center bg-white border border-outline-variant rounded-2xl px-md py-4 transition-all soft-shadow">
+<span class="material-symbols-outlined text-primary-container mr-sm" style="font-variation-settings: 'FILL' 1;">face</span>
+<input class="w-full border-none focus:ring-0 bg-transparent text-body-lg p-0 placeholder-outline-variant" placeholder="请输入宝贝昵称" type="text"/>
+</div>
+</div>
+<div class="group">
+<label class="block mb-xs font-label-lg text-label-lg text-on-surface-variant ml-1">宝贝年龄</label>
+<div class="input-focus-effect flex items-center bg-white border border-outline-variant rounded-2xl px-md py-4 transition-all soft-shadow">
+<span class="material-symbols-outlined text-primary-container mr-sm" style="font-variation-settings: 'FILL' 1;">cake</span>
+<input class="w-full border-none focus:ring-0 bg-transparent text-body-lg p-0 placeholder-outline-variant" placeholder="请输入宝贝年龄" type="number"/>
+<span class="text-on-surface-variant font-label-lg px-2">岁</span>
+</div>
+</div>
+<div class="group">
+<label class="block mb-xs font-label-lg text-label-lg text-on-surface-variant ml-1">性别 (可选)</label>
+<div class="grid grid-cols-2 gap-md">
+<button class="flex items-center justify-center gap-xs py-3 rounded-2xl border border-outline-variant bg-white transition-all sticker-bounce hover:bg-primary-fixed" id="btn-boy">
+<span class="material-symbols-outlined text-blue-400">boy</span>
+<span class="font-label-lg">小王子</span>
+</button>
+<button class="flex items-center justify-center gap-xs py-3 rounded-2xl border border-outline-variant bg-white transition-all sticker-bounce hover:bg-primary-fixed" id="btn-girl">
+<span class="material-symbols-outlined text-primary-container">girl</span>
+<span class="font-label-lg">小公主</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Fun Sticker Element for Visual Flourish -->
+<div class="mt-xl p-lg bg-secondary-fixed rounded-3xl flex items-start gap-md border border-white/50 relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<div class="flex-1">
+<h3 class="font-headline-sm text-headline-sm text-on-secondary-container">准备好了吗？</h3>
+<p class="text-on-secondary-fixed-variant text-body-md mt-1">添加成功后，您就可以为宝贝规划精彩的课程进度啦！</p>
+</div>
+</div>
+</main>
+<!-- Fixed Save Button -->
+<footer class="p-container-margin pb-safe sticky bottom-0 bg-background/80 backdrop-blur-md">
+<button class="w-full bg-primary-container text-white py-4 rounded-3xl font-headline-sm text-headline-sm shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2" id="save-btn">
+<span>保存</span>
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+</footer>
+<!-- Feedback Overlay (Sticker Animation Placeholder) -->
+<div class="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300" id="success-overlay">
+<div class="bg-white p-xl rounded-full soft-shadow scale-50 transition-transform duration-500 flex flex-col items-center" id="sticker-popup">
+<span class="material-symbols-outlined text-primary-container text-7xl mb-md" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<p class="font-headline-md text-primary">添加成功!</p>
+</div>
+</div>
+<script>
+        // Gender selection interaction
+        const btnBoy = document.getElementById('btn-boy');
+        const btnGirl = document.getElementById('btn-girl');
+
+        const selectGender = (active, inactive) => {
+            active.classList.add('bg-primary-container', 'text-white', 'border-transparent');
+            active.classList.remove('bg-white', 'text-on-surface-variant');
+            inactive.classList.remove('bg-primary-container', 'text-white', 'border-transparent');
+            inactive.classList.add('bg-white', 'text-on-surface-variant');
+        };
+
+        btnBoy.addEventListener('click', () => selectGender(btnBoy, btnGirl));
+        btnGirl.addEventListener('click', () => selectGender(btnGirl, btnBoy));
+
+        // Mock Avatar Preview
+        const avatarInput = document.getElementById('avatar-input');
+        const avatarPreview = document.getElementById('avatar-preview');
+        avatarInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Save Interaction
+        const saveBtn = document.getElementById('save-btn');
+        const overlay = document.getElementById('success-overlay');
+        const sticker = document.getElementById('sticker-popup');
+
+        saveBtn.addEventListener('click', () => {
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            sticker.classList.remove('scale-50');
+            sticker.classList.add('scale-100');
+            
+            // Simple bounce animation
+            sticker.animate([
+                { transform: 'scale(0.8)' },
+                { transform: 'scale(1.1)' },
+                { transform: 'scale(1)' }
+            ], { duration: 500, easing: 'ease-out' });
+
+            setTimeout(() => {
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                sticker.classList.add('scale-50');
+                sticker.classList.remove('scale-100');
+            }, 2000);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #fff8f9;
+            color: #1d1b1c;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sticker-shadow {
+            box-shadow: 0 12px 24px -4px rgba(255, 140, 158, 0.12);
+        }
+        .input-focus-ring:focus-within {
+            border-width: 2px;
+            border-color: #9d3f51;
+            padding: calc(0.75rem - 1px);
+        }
+        .bounce-active:active {
+            transform: scale(0.98);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "warning-orange": "#FF9500",
+                        "secondary-fixed": "#ffdcc5",
+                        "on-tertiary-container": "#67313c",
+                        "text-main": "#4A3F3F",
+                        "surface-tint": "#9d3f51",
+                        "on-secondary-fixed-variant": "#653d1f",
+                        "on-tertiary-fixed-variant": "#6d3641",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8f9",
+                        "on-secondary-container": "#794e2e",
+                        "inverse-on-surface": "#f6eff0",
+                        "text-muted": "#8E7F7F",
+                        "on-secondary-fixed": "#301400",
+                        "inverse-primary": "#ffb2bc",
+                        "on-surface": "#1d1b1c",
+                        "tertiary-fixed-dim": "#feb2be",
+                        "outline-variant": "#dbc0c2",
+                        "on-tertiary-fixed": "#370b17",
+                        "danger-red": "#FF3B30",
+                        "surface-container": "#f3eced",
+                        "success-green": "#4CD964",
+                        "primary-fixed": "#ffd9dd",
+                        "surface-container-high": "#ede7e8",
+                        "surface-dim": "#dfd8d9",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#884d58",
+                        "primary-container": "#ff8c9e",
+                        "on-primary-fixed-variant": "#7e273a",
+                        "surface-variant": "#e7e1e2",
+                        "secondary": "#805434",
+                        "surface-container-highest": "#e7e1e2",
+                        "surface-bright": "#fff8f9",
+                        "surface-container-low": "#f9f2f3",
+                        "tertiary-container": "#e39ba7",
+                        "secondary-fixed-dim": "#f4ba93",
+                        "on-surface-variant": "#554244",
+                        "primary-fixed-dim": "#ffb2bc",
+                        "on-primary-container": "#782235",
+                        "error-container": "#ffdad6",
+                        "primary": "#9d3f51",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#323031",
+                        "on-background": "#1d1b1c",
+                        "tertiary-fixed": "#ffd9de",
+                        "on-primary-fixed": "#400012",
+                        "secondary-container": "#fdc39b",
+                        "surface": "#fff8f9",
+                        "on-error": "#ffffff",
+                        "outline": "#887274"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "gutter": "12px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "label-lg": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-start px-container-margin pt-xl pb-lg max-w-md mx-auto w-full">
+<!-- Header / Identity Area -->
+<header class="w-full flex flex-col items-center mt-xl mb-xl">
+<div class="relative mb-lg">
+<div class="w-24 h-24 bg-primary-container rounded-full flex items-center justify-center animate-float overflow-hidden shadow-lg border-4 border-white">
+<span class="material-symbols-outlined text-on-primary-container text-[48px]" style="font-variation-settings: 'FILL' 1;">child_care</span>
+</div>
+<!-- Decorative Sticker Elements -->
+<div class="absolute -top-2 -right-2 w-8 h-8 bg-warning-orange rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+<span class="material-symbols-outlined text-white text-lg">star</span>
+</div>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary text-center">Lesson Butler</h1>
+<p class="font-body-lg text-body-lg text-text-muted text-center mt-xs">让课程管理变得如拆开贴纸书般轻松</p>
+</header>
+<!-- Form Area -->
+<section class="w-full space-y-lg">
+<!-- Welcome Title -->
+<div class="text-left w-full mb-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">欢迎回来</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">输入手机号，开启有序的一天</p>
+</div>
+<!-- Login Inputs -->
+<div class="space-y-md">
+<!-- Phone Number Input -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-lg text-label-lg text-on-surface-variant ml-xs">手机号码</label>
+<div class="group relative flex items-center bg-white border-2 border-outline-variant rounded-xl px-md py-sm transition-all duration-300 input-focus-ring focus-within:shadow-md">
+<span class="material-symbols-outlined text-outline mr-sm">phone_iphone</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-body-lg p-0 placeholder:text-outline-variant" maxlength="11" placeholder="请输入11位手机号" type="tel"/>
+</div>
+</div>
+<!-- Verification Code Input -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-lg text-label-lg text-on-surface-variant ml-xs">验证码</label>
+<div class="flex gap-md">
+<div class="group relative flex-grow flex items-center bg-white border-2 border-outline-variant rounded-xl px-md py-sm transition-all duration-300 input-focus-ring focus-within:shadow-md">
+<span class="material-symbols-outlined text-outline mr-sm">verified_user</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-body-lg p-0 placeholder:text-outline-variant" maxlength="6" placeholder="6位验证码" type="number"/>
+</div>
+<button class="whitespace-nowrap px-md bg-secondary-fixed text-on-secondary-fixed-variant font-label-lg rounded-xl transition-all duration-200 hover:bg-secondary-container active:scale-95 border-2 border-transparent" id="getCodeBtn">
+                            获取验证码
+                        </button>
+</div>
+</div>
+</div>
+<!-- Agreement Checkbox -->
+<div class="flex items-start gap-sm px-xs mt-sm">
+<div class="pt-1">
+<input class="w-5 h-5 rounded-md border-2 border-outline-variant text-primary focus:ring-primary-container transition-all cursor-pointer" id="agreement" type="checkbox"/>
+</div>
+<label class="font-body-md text-body-md text-on-surface-variant cursor-pointer select-none" for="agreement">
+                    我已阅读并同意 <span class="text-primary font-label-lg">《用户协议》</span> 与 <span class="text-primary font-label-lg">《隐私政策》</span>
+</label>
+</div>
+<!-- Main CTA -->
+<div class="pt-md">
+<button class="w-full h-[56px] bg-primary text-on-primary rounded-full font-headline-sm text-headline-sm shadow-lg sticker-shadow bounce-active transition-all duration-300 flex items-center justify-center gap-sm" id="loginBtn">
+<span>开启奇妙旅程</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Footer / Social Login -->
+<footer class="mt-auto pt-xl w-full text-center">
+<div class="flex items-center gap-md mb-lg">
+<div class="h-px bg-outline-variant flex-grow"></div>
+<span class="font-label-md text-label-md text-outline">其他登录方式</span>
+<div class="h-px bg-outline-variant flex-grow"></div>
+</div>
+<div class="flex justify-center gap-xl">
+<button class="w-12 h-12 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant hover:text-primary hover:border-primary transition-all duration-200 bounce-active">
+<svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12.5,2C6.7,2,2,6.7,2,12.5C2,18.3,6.7,23,12.5,23S23,18.3,23,12.5C23,6.7,18.3,2,12.5,2z M17,14c0,0.6-0.4,1-1,1h-7 c-0.6,0-1-0.4-1-1s0.4-1,1-1h7C16.6,13,17,13.4,17,14z M17,11c0,0.6-0.4,1-1,1H8c-0.6,0-1-0.4-1-1s0.4-1,1-1h8C16.6,10,17,10.4,17,11z"></path></svg>
+</button>
+<button class="w-12 h-12 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant hover:text-primary hover:border-primary transition-all duration-200 bounce-active">
+<span class="material-symbols-outlined">fingerprint</span>
+</button>
+</div>
+</footer>
+</main>
+<!-- Micro-interaction Script -->
+<script>
+        // Get Code Button Timer Logic
+        const getCodeBtn = document.getElementById('getCodeBtn');
+        let timer = null;
+        let countdown = 60;
+
+        getCodeBtn.addEventListener('click', () => {
+            if (timer) return;
+            
+            getCodeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            getCodeBtn.innerText = `${countdown}s 后重新获取`;
+            
+            timer = setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    timer = null;
+                    countdown = 60;
+                    getCodeBtn.innerText = '获取验证码';
+                    getCodeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    getCodeBtn.innerText = `${countdown}s 后重新获取`;
+                }
+            }, 1000);
+        });
+
+        // Login Button Feedback
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.addEventListener('click', () => {
+            const agreement = document.getElementById('agreement').checked;
+            if (!agreement) {
+                // Shake animation for terms
+                const termsLabel = loginBtn.parentElement.previousElementSibling;
+                termsLabel.classList.add('animate-pulse', 'text-error');
+                setTimeout(() => {
+                    termsLabel.classList.remove('animate-pulse', 'text-error');
+                }, 1000);
+                return;
+            }
+
+            // Success Visual Feedback
+            loginBtn.innerHTML = `
+                <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                <span>加载中...</span>
+            `;
+            loginBtn.classList.add('bg-success-green');
+            
+            setTimeout(() => {
+                loginBtn.innerHTML = `
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>欢迎开启！</span>
+                `;
+            }, 1200);
+        });
+    </script>
+</body></html>
