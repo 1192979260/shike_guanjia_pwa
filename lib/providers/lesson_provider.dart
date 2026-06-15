@@ -12,11 +12,13 @@ class LessonProvider extends ChangeNotifier {
 
   List<Lesson> _lessons = [];
   List<Lesson> _todayLessons = [];
+  List<LessonChangeRecord> _lessonChangeRecords = [];
   bool _isLoading = false;
   String? _error;
 
   List<Lesson> get lessons => _lessons;
   List<Lesson> get todayLessons => _todayLessons;
+  List<LessonChangeRecord> get lessonChangeRecords => _lessonChangeRecords;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -83,6 +85,37 @@ class LessonProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> loadLessonChangeHistory({
+    String? childId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _lessonChangeRecords = await _lessonService.getLessonChangeHistory(
+        childId: childId,
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Failed to load lesson change history: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  List<LessonChangeRecord> getLessonChangeRecordsForClass(String classId) {
+    return _lessonChangeRecords
+        .where((record) => record.classId == classId)
+        .toList(growable: false)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   Future<void> repairMissingInitialLessons(List<TrainingClass> classes) async {
@@ -233,6 +266,7 @@ class LessonProvider extends ChangeNotifier {
     required LessonChangeType type,
     required LessonChangeSource source,
     required DateTime newScheduledDate,
+    DateTime? newScheduledEndDate,
     String? reason,
   }) async {
     final lesson = _lessons.firstWhere(
@@ -243,6 +277,12 @@ class LessonProvider extends ChangeNotifier {
     if (lesson.status != LessonStatus.scheduled) return false;
     if (newScheduledDate.isBefore(DateTime.now())) {
       _error = '新上课时间不能早于当前时间';
+      notifyListeners();
+      return false;
+    }
+    if (newScheduledEndDate != null &&
+        !newScheduledEndDate.isAfter(newScheduledDate)) {
+      _error = '新上课结束时间必须晚于开始时间';
       notifyListeners();
       return false;
     }
@@ -257,6 +297,7 @@ class LessonProvider extends ChangeNotifier {
         type: type,
         source: source,
         newScheduledDate: newScheduledDate,
+        newScheduledEndDate: newScheduledEndDate,
         reason: reason,
       );
       if (change == null) {
@@ -269,6 +310,7 @@ class LessonProvider extends ChangeNotifier {
       final replacement = await _lessonService.getLesson(change.newLessonId);
       if (original != null) _upsertLesson(original);
       if (replacement != null) _upsertLesson(replacement);
+      _upsertLessonChangeRecord(change);
       _lessons.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
       await _syncReminders();
       _isLoading = false;
@@ -277,6 +319,60 @@ class LessonProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to change lesson: $e');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> cancelLessonChange(String changeId) async {
+    final change = _lessonChangeRecords.firstWhere(
+      (record) => record.id == changeId,
+      orElse: () => throw Exception('Lesson change not found'),
+    );
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final success = await _lessonService.cancelLessonChange(changeId);
+      if (!success) {
+        _error = '撤销课次变更失败';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      _upsertLessonChangeRecord(
+        LessonChangeRecord(
+          id: change.id,
+          lessonId: change.lessonId,
+          classId: change.classId,
+          childId: change.childId,
+          type: change.type,
+          source: change.source,
+          reason: change.reason,
+          originalStartAt: change.originalStartAt,
+          originalEndAt: change.originalEndAt,
+          newLessonId: change.newLessonId,
+          status: LessonChangeStatus.cancelled,
+          createdAt: change.createdAt,
+        ),
+      );
+
+      final original = await _lessonService.getLesson(change.lessonId);
+      if (original != null) _upsertLesson(original);
+      _lessons.removeWhere((lesson) => lesson.id == change.newLessonId);
+      _todayLessons.removeWhere((lesson) => lesson.id == change.newLessonId);
+      _lessons.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+      await _syncReminders();
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Failed to cancel lesson change: $e');
       _isLoading = false;
       notifyListeners();
       return false;
@@ -357,5 +453,17 @@ class LessonProvider extends ChangeNotifier {
     }
     final todayIndex = _todayLessons.indexWhere((item) => item.id == lesson.id);
     if (todayIndex >= 0) _todayLessons[todayIndex] = lesson;
+  }
+
+  void _upsertLessonChangeRecord(LessonChangeRecord record) {
+    final index = _lessonChangeRecords.indexWhere(
+      (item) => item.id == record.id,
+    );
+    if (index >= 0) {
+      _lessonChangeRecords[index] = record;
+    } else {
+      _lessonChangeRecords.insert(0, record);
+    }
+    _lessonChangeRecords.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 }

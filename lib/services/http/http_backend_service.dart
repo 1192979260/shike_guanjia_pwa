@@ -412,6 +412,7 @@ class HttpBackendService
     required LessonChangeType type,
     required LessonChangeSource source,
     required DateTime newScheduledDate,
+    DateTime? newScheduledEndDate,
     String? reason,
   }) async {
     final data = await _client.postData<Map<String, dynamic>>(
@@ -422,6 +423,9 @@ class HttpBackendService
         'source': source.name,
         'reason': reason,
         'newScheduledDate': _localIso(newScheduledDate),
+        'newScheduledEndDate': newScheduledEndDate == null
+            ? null
+            : _localIso(newScheduledEndDate),
       },
     );
     return LessonChangeRecord.fromJson(data);

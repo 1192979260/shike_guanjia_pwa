@@ -23,15 +23,21 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     super.initState();
     _cls = widget.cls;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LessonProvider>().loadLessons(classId: _cls.id);
+      final lessonProvider = context.read<LessonProvider>();
+      lessonProvider.loadLessons(classId: _cls.id);
+      lessonProvider.loadLessonChangeHistory();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final allLessons = context.watch<LessonProvider>().lessons;
+    final lessonProvider = context.watch<LessonProvider>();
+    final allLessons = lessonProvider.lessons;
     final classLessons = allLessons.where((l) => l.classId == _cls.id).toList()
       ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+    final changeRecords = lessonProvider.getLessonChangeRecordsForClass(
+      _cls.id,
+    );
     final nextLesson = _nextScheduledLesson(classLessons);
     final progress = _cls.totalHours == 0
         ? 0.0
@@ -215,6 +221,23 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                   ),
                 ),
               ],
+              const SectionTitle(title: '课次变更记录'),
+              StickerCard(
+                child: changeRecords.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          '暂无课次变更记录',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          for (final record in changeRecords.take(5))
+                            _changeRecordRow(record, classLessons),
+                        ],
+                      ),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -291,6 +314,55 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     );
   }
 
+  Widget _changeRecordRow(
+    LessonChangeRecord record,
+    List<Lesson> classLessons,
+  ) {
+    final newLesson = _lessonById(classLessons, record.newLessonId);
+    final isActive = record.status == LessonChangeStatus.active;
+    final color = isActive ? AppTheme.primary : AppTheme.textTertiary;
+    final newTime = newLesson == null ? '新课次已移除' : _lessonTimeRange(newLesson);
+    final statusText = isActive ? '生效中' : '已撤销';
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        record.type == LessonChangeType.leave
+            ? Icons.event_busy_rounded
+            : Icons.swap_horiz_rounded,
+        color: color,
+      ),
+      title: Text(
+        '${_changeTypeLabel(record.type)} · ${_changeSourceLabel(record.source)} · $statusText',
+        style: Theme.of(context).textTheme.titleSmall,
+      ),
+      subtitle: Text(
+        '原：${formatDateChinese(record.originalStartAt)} ${formatTime(record.originalStartAt)}\n新：$newTime'
+        '${record.reason == null || record.reason!.isEmpty ? '' : '\n原因：${record.reason}'}',
+      ),
+      trailing: isActive
+          ? TextButton(
+              onPressed: () => _confirmCancelLessonChange(record),
+              child: const Text('撤销'),
+            )
+          : const Icon(Icons.check_circle_outline_rounded),
+    );
+  }
+
+  Lesson? _lessonById(List<Lesson> lessons, String lessonId) {
+    for (final lesson in lessons) {
+      if (lesson.id == lessonId) return lesson;
+    }
+    return null;
+  }
+
+  String _lessonTimeRange(Lesson lesson) {
+    final end =
+        lesson.scheduledEndDate ??
+        lesson.scheduledDate.add(const Duration(hours: 1));
+    return '${formatDateChinese(lesson.scheduledDate)} ${formatTime(lesson.scheduledDate)}-${formatTime(end)}';
+  }
+
   Future<void> _confirmCancelCheckIn(Lesson lesson) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -329,6 +401,44 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
       setState(() => _cls = nextClass);
     }
     messenger.showSnackBar(const SnackBar(content: Text('已取消打卡')));
+  }
+
+  Future<void> _confirmCancelLessonChange(LessonChangeRecord record) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('撤销课次变更？'),
+        content: Text(
+          '撤销后原课次会恢复为待上课，${_changeTypeLabel(record.type)}生成的新课次会被移除。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('先不撤销'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('确认撤销'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final lessonProvider = context.read<LessonProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final success = await lessonProvider.cancelLessonChange(record.id);
+    if (!mounted) return;
+    if (!success) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(lessonProvider.error ?? '撤销课次变更失败')),
+      );
+      return;
+    }
+    await lessonProvider.loadLessons(classId: _cls.id);
+    await lessonProvider.loadLessonChangeHistory();
+    if (!mounted) return;
+    messenger.showSnackBar(const SnackBar(content: Text('已撤销课次变更')));
   }
 
   Lesson? _nextScheduledLesson(List<Lesson> lessons) {
@@ -430,10 +540,19 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     }
 
     Lesson selectedLesson = initialLesson;
+    Duration lessonDuration(Lesson lesson) {
+      final end = lesson.scheduledEndDate;
+      if (end == null || !end.isAfter(lesson.scheduledDate)) {
+        return const Duration(hours: 1);
+      }
+      return end.difference(lesson.scheduledDate);
+    }
+
     var type = LessonChangeType.leave;
     var source = LessonChangeSource.student;
     var reason = '';
     var newStart = selectedLesson.scheduledDate.add(const Duration(days: 7));
+    var newEnd = newStart.add(lessonDuration(selectedLesson));
 
     showModalBottomSheet(
       context: context,
@@ -444,7 +563,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
       ),
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) {
-          Future<void> pickDateTime() async {
+          Future<void> pickDate() async {
             final date = await showDatePicker(
               context: context,
               initialDate: newStart,
@@ -452,16 +571,56 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
               lastDate: DateTime.now().add(const Duration(days: 540)),
             );
             if (date == null || !context.mounted) return;
-            final time = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.fromDateTime(newStart),
-            );
-            if (time == null) return;
             setSheetState(() {
               newStart = DateTime(
                 date.year,
                 date.month,
                 date.day,
+                newStart.hour,
+                newStart.minute,
+              );
+              newEnd = DateTime(
+                date.year,
+                date.month,
+                date.day,
+                newEnd.hour,
+                newEnd.minute,
+              );
+            });
+          }
+
+          Future<void> pickStartTime() async {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(newStart),
+            );
+            if (time == null) return;
+            final duration = newEnd.isAfter(newStart)
+                ? newEnd.difference(newStart)
+                : lessonDuration(selectedLesson);
+            setSheetState(() {
+              newStart = DateTime(
+                newStart.year,
+                newStart.month,
+                newStart.day,
+                time.hour,
+                time.minute,
+              );
+              newEnd = newStart.add(duration);
+            });
+          }
+
+          Future<void> pickEndTime() async {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(newEnd),
+            );
+            if (time == null) return;
+            setSheetState(() {
+              newEnd = DateTime(
+                newStart.year,
+                newStart.month,
+                newStart.day,
                 time.hour,
                 time.minute,
               );
@@ -518,7 +677,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            '${_cls.className}\n原课次：${formatDateChinese(selectedLesson.scheduledDate)} ${formatTime(selectedLesson.scheduledDate)}',
+                            '${_cls.className}\n原课次：${_lessonTimeRange(selectedLesson)}',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
@@ -548,6 +707,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         newStart = next.scheduledDate.add(
                           const Duration(days: 7),
                         );
+                        newEnd = newStart.add(lessonDuration(next));
                       });
                     },
                   ),
@@ -584,14 +744,28 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         .toList(),
                   ),
                   const SizedBox(height: 16),
-                  Text('新上课时间', style: Theme.of(context).textTheme.titleSmall),
+                  Text('新上课时段', style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: pickDateTime,
-                    icon: const Icon(Icons.schedule_rounded),
-                    label: Text(
-                      '${formatDateChinese(newStart)} ${formatTime(newStart)}',
-                    ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: pickDate,
+                        icon: const Icon(Icons.calendar_month_rounded),
+                        label: Text(formatDateChinese(newStart)),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: pickStartTime,
+                        icon: const Icon(Icons.play_arrow_rounded),
+                        label: Text(formatTime(newStart)),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: pickEndTime,
+                        icon: const Icon(Icons.stop_rounded),
+                        label: Text(formatTime(newEnd)),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -618,11 +792,18 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           onPressed: () async {
                             final navigator = Navigator.of(sheetContext);
                             final messenger = ScaffoldMessenger.of(context);
+                            if (!newEnd.isAfter(newStart)) {
+                              messenger.showSnackBar(
+                                const SnackBar(content: Text('结束时间必须晚于开始时间')),
+                              );
+                              return;
+                            }
                             final success = await lessonProvider.changeLesson(
                               lessonId: selectedLesson.id,
                               type: type,
                               source: source,
                               newScheduledDate: newStart,
+                              newScheduledEndDate: newEnd,
                               reason: reason.isEmpty ? null : reason,
                             );
                             if (!mounted) return;
@@ -637,6 +818,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                               return;
                             }
                             await lessonProvider.loadLessons(classId: _cls.id);
+                            await lessonProvider.loadLessonChangeHistory();
                             if (!mounted) return;
                             navigator.pop();
                             messenger.showSnackBar(

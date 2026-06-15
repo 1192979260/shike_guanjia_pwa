@@ -54,12 +54,14 @@ class HttpLessonService implements LessonService {
     required LessonChangeType type,
     required LessonChangeSource source,
     required DateTime newScheduledDate,
+    DateTime? newScheduledEndDate,
     String? reason,
   }) => _backend.createLessonChange(
     lessonId: lessonId,
     type: type,
     source: source,
     newScheduledDate: newScheduledDate,
+    newScheduledEndDate: newScheduledEndDate,
     reason: reason,
   );
 

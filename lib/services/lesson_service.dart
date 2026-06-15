@@ -38,6 +38,7 @@ abstract class LessonService {
     required LessonChangeType type,
     required LessonChangeSource source,
     required DateTime newScheduledDate,
+    DateTime? newScheduledEndDate,
     String? reason,
   });
 

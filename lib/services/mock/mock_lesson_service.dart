@@ -149,6 +149,7 @@ class MockLessonService implements LessonService {
     required LessonChangeType type,
     required LessonChangeSource source,
     required DateTime newScheduledDate,
+    DateTime? newScheduledEndDate,
     String? reason,
   }) async {
     final lesson = _store.lessons[lessonId];
@@ -161,10 +162,14 @@ class MockLessonService implements LessonService {
     final duration = originalEnd == null
         ? const Duration(hours: 1)
         : originalEnd.difference(lesson.scheduledDate);
+    final newEnd = newScheduledEndDate ?? newScheduledDate.add(duration);
+    if (!newEnd.isAfter(newScheduledDate)) {
+      return null;
+    }
     final newLesson = lesson.copyWith(
       id: _uuid.v4(),
       scheduledDate: newScheduledDate,
-      scheduledEndDate: newScheduledDate.add(duration),
+      scheduledEndDate: newEnd,
       status: LessonStatus.scheduled,
       isMakeup: true,
       leaveReason: null,

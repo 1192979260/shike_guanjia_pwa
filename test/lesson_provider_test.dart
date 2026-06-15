@@ -62,14 +62,81 @@ void main() {
       isTrue,
     );
   });
+
+  test('loads and cancels lesson change history', () async {
+    final original = Lesson(
+      id: 'lesson-original',
+      classId: 'class-a',
+      scheduledDate: DateTime(2026, 6, 16, 16),
+      status: LessonStatus.rescheduled,
+    );
+    final replacement = Lesson(
+      id: 'lesson-replacement',
+      classId: 'class-a',
+      scheduledDate: DateTime(2026, 6, 23, 16),
+      status: LessonStatus.scheduled,
+      isMakeup: true,
+    );
+    final change = LessonChangeRecord(
+      id: 'change-a',
+      lessonId: original.id,
+      classId: original.classId,
+      childId: 'child-a',
+      type: LessonChangeType.reschedule,
+      source: LessonChangeSource.teacher,
+      reason: '老师请假',
+      originalStartAt: original.scheduledDate,
+      originalEndAt: original.scheduledDate.add(const Duration(hours: 1)),
+      newLessonId: replacement.id,
+      status: LessonChangeStatus.active,
+      createdAt: DateTime(2026, 6, 15),
+    );
+    final lessonService = _RecordingLessonService(
+      classLessons: [original, replacement],
+      changeRecords: [change],
+      lessonsById: {
+        original.id: original.copyWith(status: LessonStatus.scheduled),
+      },
+    );
+    getIt.registerSingleton<LessonService>(lessonService);
+    getIt.registerSingleton<AttendanceService>(_UnusedAttendanceService());
+
+    final provider = LessonProvider();
+    await provider.loadLessons(classId: original.classId);
+    await provider.loadLessonChangeHistory();
+
+    expect(provider.getLessonChangeRecordsForClass(original.classId), [change]);
+
+    final success = await provider.cancelLessonChange(change.id);
+
+    expect(success, isTrue);
+    expect(lessonService.cancelledChangeIds, [change.id]);
+    expect(provider.lessons.map((lesson) => lesson.id), [original.id]);
+    expect(provider.lessons.single.status, LessonStatus.scheduled);
+    expect(
+      provider.lessonChangeRecords.single.status,
+      LessonChangeStatus.cancelled,
+    );
+  });
 }
 
 class _RecordingLessonService implements LessonService {
-  _RecordingLessonService({List<Lesson> rangeLessons = const []})
-    : rangeLessons = List.of(rangeLessons);
+  _RecordingLessonService({
+    List<Lesson> rangeLessons = const [],
+    List<Lesson> classLessons = const [],
+    List<LessonChangeRecord> changeRecords = const [],
+    Map<String, Lesson> lessonsById = const {},
+  }) : rangeLessons = List.of(rangeLessons),
+       classLessons = List.of(classLessons),
+       changeRecords = List.of(changeRecords),
+       lessonsById = Map.of(lessonsById);
 
   final List<Lesson> rangeLessons;
+  final List<Lesson> classLessons;
+  final List<LessonChangeRecord> changeRecords;
+  final Map<String, Lesson> lessonsById;
   final generatedClassIds = <String>[];
+  final cancelledChangeIds = <String>[];
   DateTime? lastRangeStart;
   DateTime? lastRangeEnd;
 
@@ -98,18 +165,22 @@ class _RecordingLessonService implements LessonService {
     required LessonChangeType type,
     required LessonChangeSource source,
     required DateTime newScheduledDate,
+    DateTime? newScheduledEndDate,
     String? reason,
   }) async => null;
 
   @override
-  Future<bool> cancelLessonChange(String changeId) async => true;
+  Future<bool> cancelLessonChange(String changeId) async {
+    cancelledChangeIds.add(changeId);
+    return true;
+  }
 
   @override
   Future<List<LessonChangeRecord>> getLessonChangeHistory({
     String? childId,
     DateTime? startDate,
     DateTime? endDate,
-  }) async => [];
+  }) async => changeRecords;
 
   @override
   Future<List<Lesson>> checkConflicts(Lesson lesson) async => [];
@@ -131,10 +202,10 @@ class _RecordingLessonService implements LessonService {
   }
 
   @override
-  Future<List<Lesson>> getClassLessons(String classId) async => [];
+  Future<List<Lesson>> getClassLessons(String classId) async => classLessons;
 
   @override
-  Future<Lesson?> getLesson(String lessonId) async => null;
+  Future<Lesson?> getLesson(String lessonId) async => lessonsById[lessonId];
 
   @override
   Future<List<Lesson>> getTodayLessons(String familyId) async => [];
