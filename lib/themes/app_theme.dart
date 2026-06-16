@@ -41,7 +41,6 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: 'Epilogue',
       scaffoldBackgroundColor: background,
       colorScheme: const ColorScheme.light(
         primary: primary,
