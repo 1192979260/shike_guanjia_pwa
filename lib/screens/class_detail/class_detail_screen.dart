@@ -175,52 +175,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                   ],
                 ),
               ),
-              if (_cls.usedHours > 0) ...[
-                const SectionTitle(title: '近期上课记录', trailing: '查看全部'),
-                StickerCard(
-                  child: Column(
-                    children: [
-                      for (final lesson
-                          in classLessons
-                              .where((l) => l.status == LessonStatus.completed)
-                              .toList()
-                              .reversed
-                              .take(3))
-                        _recordRow(
-                          Icons.check_circle_rounded,
-                          '第 ${classLessons.indexOf(lesson) + 1} 课：${_cls.courseName}',
-                          '${formatDateChinese(lesson.scheduledDate)} ${formatTime(lesson.scheduledDate)}',
-                          AppTheme.sage,
-                          onCancelCheckIn: () => _confirmCancelCheckIn(lesson),
-                        ),
-                      for (final lesson
-                          in classLessons
-                              .where((l) => l.status == LessonStatus.leave)
-                              .toList()
-                              .take(1))
-                        _recordRow(
-                          Icons.event_busy_rounded,
-                          '第 ${classLessons.indexOf(lesson) + 1} 课：请假',
-                          lesson.leaveReason ?? '已顺延',
-                          AppTheme.warning,
-                        ),
-                      for (final lesson
-                          in classLessons
-                              .where(
-                                (l) => l.status == LessonStatus.rescheduled,
-                              )
-                              .toList()
-                              .take(1))
-                        _recordRow(
-                          Icons.swap_horiz_rounded,
-                          '第 ${classLessons.indexOf(lesson) + 1} 课：已调课',
-                          lesson.leaveReason ?? '已安排新时间',
-                          AppTheme.primary,
-                        ),
-                    ],
-                  ),
-                ),
-              ],
               const SectionTitle(title: '课次变更记录'),
               StickerCard(
                 child: changeRecords.isEmpty
@@ -296,24 +250,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     );
   }
 
-  Widget _recordRow(
-    IconData icon,
-    String title,
-    String subtitle,
-    Color color, {
-    VoidCallback? onCancelCheckIn,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: color),
-      title: Text(title, style: Theme.of(context).textTheme.titleSmall),
-      subtitle: Text(subtitle),
-      trailing: onCancelCheckIn == null
-          ? const Icon(Icons.chevron_right_rounded)
-          : TextButton(onPressed: onCancelCheckIn, child: const Text('取消打卡')),
-    );
-  }
-
   Widget _changeRecordRow(
     LessonChangeRecord record,
     List<Lesson> classLessons,
@@ -361,46 +297,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
         lesson.scheduledEndDate ??
         lesson.scheduledDate.add(const Duration(hours: 1));
     return '${formatDateChinese(lesson.scheduledDate)} ${formatTime(lesson.scheduledDate)}-${formatTime(end)}';
-  }
-
-  Future<void> _confirmCancelCheckIn(Lesson lesson) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('取消打卡？'),
-        content: const Text('取消后这节课会恢复为待上课，并返还已消耗的课时。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('先不取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('确认取消'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-    final lessonProvider = context.read<LessonProvider>();
-    final classProvider = context.read<ClassProvider>();
-    final messenger = ScaffoldMessenger.of(context);
-    await lessonProvider.cancelCheckIn(lesson.id);
-    await lessonProvider.loadLessons(classId: _cls.id);
-    await classProvider.loadClasses();
-    if (!mounted) return;
-    TrainingClass? updatedClass;
-    for (final item in classProvider.classes) {
-      if (item.id == _cls.id) {
-        updatedClass = item;
-        break;
-      }
-    }
-    final nextClass = updatedClass;
-    if (nextClass != null) {
-      setState(() => _cls = nextClass);
-    }
-    messenger.showSnackBar(const SnackBar(content: Text('已取消打卡')));
   }
 
   Future<void> _confirmCancelLessonChange(LessonChangeRecord record) async {
