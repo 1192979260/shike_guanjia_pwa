@@ -24,6 +24,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Lesson Butler'), findsOneWidget);
-    expect(find.text('开启奇妙旅程'), findsOneWidget);
+    expect(find.text('让课程管理变得如拆开贴纸书般轻松'), findsOneWidget);
   });
 }

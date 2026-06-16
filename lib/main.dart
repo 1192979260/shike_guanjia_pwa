@@ -18,16 +18,55 @@ void main() async {
   runApp(const ShikeGuanjiaApp());
 }
 
-class ShikeGuanjiaApp extends StatelessWidget {
+class ShikeGuanjiaApp extends StatefulWidget {
   const ShikeGuanjiaApp({super.key});
+
+  @override
+  State<ShikeGuanjiaApp> createState() => _ShikeGuanjiaAppState();
+}
+
+class _ShikeGuanjiaAppState extends State<ShikeGuanjiaApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  AuthProvider? _authProvider;
+  bool? _wasLoggedIn;
+
+  @override
+  void dispose() {
+    _authProvider?.removeListener(_handleAuthChanged);
+    super.dispose();
+  }
+
+  void _bindAuthProvider(AuthProvider auth) {
+    if (_authProvider == auth) return;
+    _authProvider?.removeListener(_handleAuthChanged);
+    _authProvider = auth;
+    _wasLoggedIn = auth.isLoggedIn;
+    auth.addListener(_handleAuthChanged);
+  }
+
+  void _handleAuthChanged() {
+    final auth = _authProvider;
+    if (auth == null || !auth.isInitialized) return;
+    final wasLoggedIn = _wasLoggedIn == true;
+    _wasLoggedIn = auth.isLoggedIn;
+    if (!wasLoggedIn || auth.isLoggedIn) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final navigator = _navigatorKey.currentState;
+      if (navigator == null || !mounted) return;
+      navigator.pushNamedAndRemoveUntil('/login', (route) => false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: globalProviders,
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, _) {
+      child: Consumer2<ThemeProvider, AuthProvider>(
+        builder: (context, themeProvider, authProvider, _) {
+          _bindAuthProvider(authProvider);
           return MaterialApp(
+            navigatorKey: _navigatorKey,
             title: '课时管家',
             theme: themeProvider.themeData,
             themeMode: ThemeMode.light,

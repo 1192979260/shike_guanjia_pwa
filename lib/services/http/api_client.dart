@@ -26,8 +26,13 @@ class ApiClient {
 
   final Dio _dio;
   String? _token;
+  Future<void> Function()? _onUnauthorized;
 
   String? get token => _token;
+
+  void setUnauthorizedHandler(Future<void> Function()? handler) {
+    _onUnauthorized = handler;
+  }
 
   void setToken(String? token) {
     _token = token;
@@ -46,6 +51,7 @@ class ApiClient {
       path,
       queryParameters: _clean(queryParameters),
     );
+    await _handleUnauthorized(response);
     return _unwrap<T>(response.data);
   }
 
@@ -54,6 +60,7 @@ class ApiClient {
       path,
       data: _clean(data),
     );
+    await _handleUnauthorized(response);
     return _unwrap<T>(response.data);
   }
 
@@ -62,11 +69,13 @@ class ApiClient {
       path,
       data: _clean(data),
     );
+    await _handleUnauthorized(response);
     return _unwrap<T>(response.data);
   }
 
   Future<T> deleteData<T>(String path) async {
     final response = await _dio.delete<Map<String, dynamic>>(path);
+    await _handleUnauthorized(response);
     return _unwrap<T>(response.data);
   }
 
@@ -79,7 +88,17 @@ class ApiClient {
       queryParameters: _clean(queryParameters),
       options: Options(responseType: ResponseType.plain),
     );
+    await _handleUnauthorized(response);
     return response.data ?? '';
+  }
+
+  Future<void> _handleUnauthorized(Response<dynamic> response) async {
+    if (response.statusCode != 401) return;
+    setToken(null);
+    final handler = _onUnauthorized;
+    if (handler != null) {
+      await handler();
+    }
   }
 
   T _unwrap<T>(Map<String, dynamic>? body) {

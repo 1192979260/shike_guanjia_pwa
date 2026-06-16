@@ -2,12 +2,19 @@ import 'package:flutter/foundation.dart';
 import '../core/service_locator.dart';
 import '../models/models.dart';
 import '../services/auth_service.dart';
+import '../services/http/api_client.dart';
 import '../services/http/http_backend_service.dart';
 import '../services/storage_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = getIt<AuthService>();
   final StorageService _storage = getIt<StorageService>();
+
+  AuthProvider() {
+    if (getIt.isRegistered<ApiClient>()) {
+      getIt<ApiClient>().setUnauthorizedHandler(clearLocalSession);
+    }
+  }
 
   bool _isLoggedIn = false;
   String? _phone;
