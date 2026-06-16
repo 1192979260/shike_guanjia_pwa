@@ -36,38 +36,38 @@ class ChildProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Child> addChild(String name, int? age, String? avatarUrl) async {
+  Future<Child?> addChild(String name, int? age, String? avatarUrl) async {
     Child? child;
 
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
+      if (_auth.familyId == null) {
+        _error = '请先登录后再添加宝贝';
+        return null;
+      }
       child = await _childService.createChild(
         name: name,
         age: age,
         avatarUrl: avatarUrl,
-        familyId: _auth.familyId ?? '',
+        familyId: _auth.familyId!,
       );
       if (child != null) {
         _children.add(child);
+      } else {
+        _error = '添加宝贝失败，请检查输入后重试';
       }
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to add child: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
 
-    _isLoading = false;
-    notifyListeners();
-    return child ??
-        Child(
-          id: '',
-          name: name,
-          age: age,
-          avatarUrl: avatarUrl,
-          familyId: _auth.familyId ?? '',
-          createdAt: DateTime.now(),
-        );
+    return child;
   }
 
   Future<void> updateChild(Child child) async {

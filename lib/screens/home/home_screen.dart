@@ -182,7 +182,14 @@ class _DashboardTabState extends State<_DashboardTab> {
                   SoftChip(
                     label: '添加',
                     icon: Icons.add_rounded,
-                    onTap: () => Navigator.pushNamed(context, '/home'),
+                    onTap: () async {
+                      final child = await Navigator.pushNamed(
+                        context,
+                        '/add_child',
+                      );
+                      if (!mounted || child is! Child) return;
+                      setState(() => _selectedChildId = child.id);
+                    },
                   ),
                 ],
               ),
@@ -1221,9 +1228,9 @@ class _MeTabState extends State<_MeTab> {
                   ),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, '/add_child'),
                   icon: const Icon(Icons.add_rounded),
-                  label: const Text('添加成员'),
+                  label: const Text('添加宝贝'),
                 ),
               ],
             ),

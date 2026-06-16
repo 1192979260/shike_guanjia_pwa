@@ -6,6 +6,7 @@ import 'package:shike_guanjia/providers/providers.dart';
 import 'package:shike_guanjia/screens/login/login_screen.dart';
 import 'package:shike_guanjia/screens/home/home_screen.dart';
 import 'package:shike_guanjia/screens/onboarding/onboarding_screen.dart';
+import 'package:shike_guanjia/screens/children/add_child_screen.dart';
 import 'package:shike_guanjia/screens/class_detail/class_detail_screen.dart';
 import 'package:shike_guanjia/screens/class_form/add_class_screen.dart';
 import 'package:shike_guanjia/screens/settings/family_sharing_screen.dart';
@@ -74,6 +75,7 @@ class _ShikeGuanjiaAppState extends State<ShikeGuanjiaApp> {
             routes: {
               '/login': (_) => const LoginScreen(),
               '/home': (_) => const HomeScreen(),
+              '/add_child': (_) => const AddChildScreen(),
               '/family_sharing': (_) => const FamilySharingScreen(),
               '/reminder_settings': (_) => const ReminderSettingsScreen(),
               '/theme_selection': (_) => const ThemeSelectionScreen(),
