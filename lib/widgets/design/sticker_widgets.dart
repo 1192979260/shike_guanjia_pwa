@@ -135,6 +135,7 @@ class SoftChip extends StatelessWidget {
   final String label;
   final bool selected;
   final IconData? icon;
+  final double maxLabelWidth;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
@@ -143,6 +144,7 @@ class SoftChip extends StatelessWidget {
     required this.label,
     this.selected = false,
     this.icon,
+    this.maxLabelWidth = 112,
     this.onTap,
     this.onLongPress,
   });
@@ -156,12 +158,24 @@ class SoftChip extends StatelessWidget {
         child: ChoiceChip(
           selected: selected,
           onSelected: (_) => onTap?.call(),
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[Icon(icon, size: 16), const SizedBox(width: 6)],
-              Text(label),
-            ],
+          label: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxLabelWidth),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16),
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
           labelStyle: TextStyle(
             color: selected ? AppTheme.textInverse : AppTheme.textSecondary,

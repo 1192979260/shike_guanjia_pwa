@@ -162,37 +162,33 @@ class _DashboardTabState extends State<_DashboardTab> {
               ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 44,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  SoftChip(
-                    label: '全部宝贝',
-                    selected: effectiveChildId == null,
-                    onTap: () => setState(() => _selectedChildId = null),
+            _ChipScroller(
+              children: [
+                SoftChip(
+                  label: '全部宝贝',
+                  selected: effectiveChildId == null,
+                  onTap: () => setState(() => _selectedChildId = null),
+                ),
+                ...children.map(
+                  (child) => SoftChip(
+                    label: child.name,
+                    selected: effectiveChildId == child.id,
+                    onTap: () => setState(() => _selectedChildId = child.id),
                   ),
-                  ...children.map(
-                    (child) => SoftChip(
-                      label: child.name,
-                      selected: effectiveChildId == child.id,
-                      onTap: () => setState(() => _selectedChildId = child.id),
-                    ),
-                  ),
-                  SoftChip(
-                    label: '添加',
-                    icon: Icons.add_rounded,
-                    onTap: () async {
-                      final child = await Navigator.pushNamed(
-                        context,
-                        '/add_child',
-                      );
-                      if (!mounted || child is! Child) return;
-                      setState(() => _selectedChildId = child.id);
-                    },
-                  ),
-                ],
-              ),
+                ),
+                SoftChip(
+                  label: '添加',
+                  icon: Icons.add_rounded,
+                  onTap: () async {
+                    final child = await Navigator.pushNamed(
+                      context,
+                      '/add_child',
+                    );
+                    if (!mounted || child is! Child) return;
+                    setState(() => _selectedChildId = child.id);
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             StickerCard(
@@ -352,25 +348,21 @@ class _ScheduleTabState extends State<_ScheduleTab> {
               Icons.calendar_month_rounded,
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              height: 44,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  SoftChip(
-                    label: '全部宝贝',
-                    selected: effectiveChildId == null,
-                    onTap: () => setState(() => _selectedChildId = null),
+            _ChipScroller(
+              children: [
+                SoftChip(
+                  label: '全部宝贝',
+                  selected: effectiveChildId == null,
+                  onTap: () => setState(() => _selectedChildId = null),
+                ),
+                ...children.map(
+                  (child) => SoftChip(
+                    label: child.name,
+                    selected: effectiveChildId == child.id,
+                    onTap: () => setState(() => _selectedChildId = child.id),
                   ),
-                  ...children.map(
-                    (child) => SoftChip(
-                      label: child.name,
-                      selected: effectiveChildId == child.id,
-                      onTap: () => setState(() => _selectedChildId = child.id),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             SectionTitle(
               title: selectedChild == null
@@ -514,51 +506,41 @@ class _ClassesTab extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                SoftChip(
-                  label: '全部宝贝',
-                  selected: classProvider.selectedChildId == null,
+          _ChipScroller(
+            children: [
+              SoftChip(
+                label: '全部宝贝',
+                selected: classProvider.selectedChildId == null,
+                onTap: () => context.read<ClassProvider>().setChildFilter(null),
+              ),
+              ...children.map(
+                (child) => SoftChip(
+                  label: child.name,
+                  selected: classProvider.selectedChildId == child.id,
                   onTap: () =>
-                      context.read<ClassProvider>().setChildFilter(null),
+                      context.read<ClassProvider>().setChildFilter(child.id),
                 ),
-                ...children.map(
-                  (child) => SoftChip(
-                    label: child.name,
-                    selected: classProvider.selectedChildId == child.id,
-                    onTap: () =>
-                        context.read<ClassProvider>().setChildFilter(child.id),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                SoftChip(
-                  label: '全部科目',
-                  selected: classProvider.selectedCourse == null,
+          _ChipScroller(
+            children: [
+              SoftChip(
+                label: '全部科目',
+                selected: classProvider.selectedCourse == null,
+                onTap: () => context.read<ClassProvider>().clearCourseFilter(),
+              ),
+              ...courses.map(
+                (course) => SoftChip(
+                  label: course,
+                  selected: classProvider.selectedCourse == course,
+                  icon: _courseIcon(course),
                   onTap: () =>
-                      context.read<ClassProvider>().clearCourseFilter(),
+                      context.read<ClassProvider>().setCourseFilter(course),
                 ),
-                ...courses.map(
-                  (course) => SoftChip(
-                    label: course,
-                    selected: classProvider.selectedCourse == course,
-                    icon: _courseIcon(course),
-                    onTap: () =>
-                        context.read<ClassProvider>().setCourseFilter(course),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           if (!hasAnyClass) _emptyClass(context),
@@ -911,23 +893,57 @@ class _StatsTabState extends State<_StatsTab> {
   }
 
   Widget _childFilter(List<Child> children) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SoftChip(
-            label: '全部宝贝',
-            selected: _selectedChildId == null,
-            onTap: () => setState(() => _selectedChildId = null),
+    return _ChipScroller(
+      children: [
+        SoftChip(
+          label: '全部宝贝',
+          selected: _selectedChildId == null,
+          onTap: () => setState(() => _selectedChildId = null),
+        ),
+        ...children.map(
+          (child) => SoftChip(
+            label: child.name,
+            selected: _selectedChildId == child.id,
+            onTap: () => setState(() => _selectedChildId = child.id),
           ),
-          ...children.map(
-            (child) => SoftChip(
-              label: child.name,
-              selected: _selectedChildId == child.id,
-              onTap: () => setState(() => _selectedChildId = child.id),
-            ),
-          ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ChipScroller extends StatelessWidget {
+  final List<Widget> children;
+
+  const _ChipScroller({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final chipMaxWidth = constraints.maxWidth.isFinite
+              ? (constraints.maxWidth * 0.36).clamp(88.0, 132.0)
+              : 112.0;
+          return ListView(
+            scrollDirection: Axis.horizontal,
+            children: children.map((child) {
+              if (child is SoftChip) {
+                return SoftChip(
+                  key: child.key,
+                  label: child.label,
+                  selected: child.selected,
+                  icon: child.icon,
+                  maxLabelWidth: chipMaxWidth,
+                  onTap: child.onTap,
+                  onLongPress: child.onLongPress,
+                );
+              }
+              return child;
+            }).toList(),
+          );
+        },
       ),
     );
   }
